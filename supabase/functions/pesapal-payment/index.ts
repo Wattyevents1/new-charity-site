@@ -68,6 +68,35 @@ async function registerIPN(token: string, ipnUrl: string): Promise<string> {
   return data.ipn_id;
 }
 
+// Simple in-memory rate limiter (per-instance, resets on cold start)
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 10; // max requests per window
+const RATE_WINDOW_MS = 60_000; // 1 minute
+
+function isRateLimited(key: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(key);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(key, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return false;
+  }
+  entry.count++;
+  return entry.count > RATE_LIMIT;
+}
+
+// Validation helpers
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 255;
+}
+
+function isValidUUID(id: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+}
+
+function sanitizeString(str: string, maxLen: number): string {
+  return str.replace(/[<>"'`;]/g, "").trim().slice(0, maxLen);
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -83,11 +112,10 @@ serve(async (req) => {
       const orderMerchantReference = url.searchParams.get("OrderMerchantReference");
       console.log("IPN received:", { orderTrackingId, orderMerchantReference });
 
-      // Check transaction status
       if (orderTrackingId) {
         const token = await getAccessToken();
         const statusRes = await fetchWithTimeout(
-          `${PESAPAL_TX_STATUS_URL}?orderTrackingId=${orderTrackingId}`,
+          `${PESAPAL_TX_STATUS_URL}?orderTrackingId=${encodeURIComponent(orderTrackingId)}`,
           {
             headers: {
               Accept: "application/json",
@@ -98,7 +126,6 @@ serve(async (req) => {
         const statusData = await statusRes.json();
         console.log("Transaction status:", statusData);
 
-        // Update donation status in database if needed
         if (statusData.payment_status_description === "Completed") {
           const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
           const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -122,16 +149,44 @@ serve(async (req) => {
       const body = await req.json();
       const { amount, donor_name, donor_email, donor_phone, description, merchant_reference, callback_url, is_recurring, project_id } = body;
 
-      if (!amount || !donor_email) {
+      // ── Input validation ──
+      if (!donor_email || typeof donor_email !== "string" || !isValidEmail(donor_email)) {
         return new Response(
-          JSON.stringify({ error: "Amount and email are required" }),
+          JSON.stringify({ error: "A valid email address is required" }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
+      const numericAmount = Number(amount);
+      if (!amount || isNaN(numericAmount) || numericAmount <= 0 || numericAmount > 1_000_000) {
+        return new Response(
+          JSON.stringify({ error: "Amount must be a positive number up to 1,000,000" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (project_id && !isValidUUID(project_id)) {
+        return new Response(
+          JSON.stringify({ error: "Invalid project ID format" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // ── Rate limiting by email ──
+      if (isRateLimited(donor_email)) {
+        return new Response(
+          JSON.stringify({ error: "Too many requests. Please try again later." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Sanitize string inputs
+      const safeDonorName = donor_name ? sanitizeString(String(donor_name), 255) : null;
+      const safeDonorPhone = donor_phone ? sanitizeString(String(donor_phone), 20) : "";
+      const safeDescription = description ? sanitizeString(String(description), 500) : "Donation";
+
       const token = await getAccessToken();
 
-      // Get the function URL for IPN
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
       const ipnCallbackUrl = `${supabaseUrl}/functions/v1/pesapal-payment?action=ipn`;
       const ipnId = await registerIPN(token, ipnCallbackUrl);
@@ -139,15 +194,15 @@ serve(async (req) => {
       const orderPayload = {
         id: merchant_reference || crypto.randomUUID(),
         currency: "USD",
-        amount: Number(amount),
-        description: description || "Donation",
+        amount: numericAmount,
+        description: safeDescription,
         callback_url: callback_url || `${new URL(req.headers.get("origin") || req.url).origin}/`,
         notification_id: ipnId,
         billing_address: {
-          email_address: donor_email,
-          phone_number: donor_phone || "",
-          first_name: donor_name?.split(" ")[0] || "",
-          last_name: donor_name?.split(" ").slice(1).join(" ") || "",
+          email_address: donor_email.trim(),
+          phone_number: safeDonorPhone,
+          first_name: safeDonorName?.split(" ")[0] || "",
+          last_name: safeDonorName?.split(" ").slice(1).join(" ") || "",
         },
       };
 
@@ -163,7 +218,7 @@ serve(async (req) => {
 
       const orderData = await orderRes.json();
       if (!orderRes.ok || orderData.error) {
-        throw new Error(`Order submission failed: ${JSON.stringify(orderData)}`);
+        throw new Error("Payment processing failed. Please try again.");
       }
 
       // Save donation record
@@ -172,11 +227,11 @@ serve(async (req) => {
       const supabase = createClient(supabaseUrl, supabaseKey);
 
       await supabase.from("donations").insert({
-        amount: Number(amount),
-        donor_name: donor_name || null,
-        donor_email: donor_email,
+        amount: numericAmount,
+        donor_name: safeDonorName,
+        donor_email: donor_email.trim(),
         payment_method: "pesapal",
-        is_recurring: is_recurring || false,
+        is_recurring: is_recurring === true,
         status: "pending",
         transaction_id: orderPayload.id,
         project_id: project_id || null,
@@ -198,8 +253,7 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Pesapal payment error:", error);
-    const msg = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: msg }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred. Please try again." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
