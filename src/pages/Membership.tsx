@@ -29,6 +29,17 @@ const Membership = () => {
     }
     setLoading(true);
     try {
+      // Create membership record via edge function
+      const { data: membershipResult, error: membershipError } = await supabase.functions.invoke("public-forms", {
+        body: {
+          action: "submit_membership",
+          data: { donor_email: email, donor_name: name || null, tier: selectedTier.name.toLowerCase() },
+        },
+      });
+      if (membershipError) throw membershipError;
+      if (membershipResult?.error) throw new Error(membershipResult.error);
+
+      // Initiate payment via Pesapal
       const { data, error } = await supabase.functions.invoke("pesapal-payment", {
         body: {
           amount: selectedTier.price,
@@ -41,14 +52,6 @@ const Membership = () => {
         },
       });
       if (error) throw error;
-
-      // Save membership record
-      await supabase.from("memberships").insert({
-        donor_email: email,
-        donor_name: name || null,
-        tier: selectedTier.name.toLowerCase(),
-        status: "pending",
-      });
 
       if (data?.redirect_url) {
         window.location.href = data.redirect_url;

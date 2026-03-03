@@ -12,9 +12,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import type { Tables } from "@/integrations/supabase/types";
 
-type Career = Tables<"careers">;
+interface Career {
+  id: string; title: string; description: string | null; requirements: string | null;
+  location: string | null; employment_type: string | null; status: string; created_at: string;
+}
+
 const emptyForm = { title: "", description: "", requirements: "", location: "", employment_type: "Full-time", status: "open" };
 
 const AdminCareers = () => {
@@ -24,22 +27,22 @@ const AdminCareers = () => {
   const [open, setOpen] = useState(false);
 
   const fetchCareers = async () => {
-    const { data } = await supabase.from("careers").select("*").order("created_at", { ascending: false });
-    setCareers(data || []);
+    const { data, error } = await supabase.functions.invoke("admin-api", {
+      body: { action: "list", entity: "careers" },
+    });
+    if (error) { toast.error("Failed to load careers"); return; }
+    setCareers(Array.isArray(data) ? data : []);
   };
 
   useEffect(() => { fetchCareers(); }, []);
 
   const handleSave = async () => {
-    if (editingId) {
-      const { error } = await supabase.from("careers").update(form).eq("id", editingId);
-      if (error) { toast.error(error.message); return; }
-      toast.success("Job updated");
-    } else {
-      const { error } = await supabase.from("careers").insert(form);
-      if (error) { toast.error(error.message); return; }
-      toast.success("Job created");
-    }
+    const body = editingId
+      ? { action: "update", entity: "careers", id: editingId, data: form }
+      : { action: "create", entity: "careers", data: form };
+    const { data, error } = await supabase.functions.invoke("admin-api", { body });
+    if (error || data?.error) { toast.error(data?.error || "Save failed"); return; }
+    toast.success(editingId ? "Job updated" : "Job created");
     setOpen(false); setForm(emptyForm); setEditingId(null); fetchCareers();
   };
 
@@ -50,7 +53,10 @@ const AdminCareers = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this job?")) return;
-    await supabase.from("careers").delete().eq("id", id);
+    const { data, error } = await supabase.functions.invoke("admin-api", {
+      body: { action: "delete", entity: "careers", id },
+    });
+    if (error || data?.error) { toast.error(data?.error || "Delete failed"); return; }
     toast.success("Job deleted"); fetchCareers();
   };
 

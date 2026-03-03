@@ -6,24 +6,32 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import type { Tables } from "@/integrations/supabase/types";
 
-type Contact = Tables<"contact_submissions">;
+interface Contact {
+  id: string; name: string; email: string; subject: string | null;
+  message: string; is_read: boolean | null; created_at: string;
+}
 
 const AdminContacts = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
 
-  const fetch = async () => {
-    const { data } = await supabase.from("contact_submissions").select("*").order("created_at", { ascending: false });
-    setContacts(data || []);
+  const fetchContacts = async () => {
+    const { data, error } = await supabase.functions.invoke("admin-api", {
+      body: { action: "list", entity: "contact_submissions" },
+    });
+    if (error) { toast.error("Failed to load contacts"); return; }
+    setContacts(Array.isArray(data) ? data : []);
   };
 
-  useEffect(() => { fetch(); }, []);
+  useEffect(() => { fetchContacts(); }, []);
 
   const markRead = async (id: string) => {
-    await supabase.from("contact_submissions").update({ is_read: true }).eq("id", id);
+    const { data, error } = await supabase.functions.invoke("admin-api", {
+      body: { action: "update", entity: "contact_submissions", id, data: { is_read: true } },
+    });
+    if (error || data?.error) { toast.error(data?.error || "Update failed"); return; }
     toast.success("Marked as read");
-    fetch();
+    fetchContacts();
   };
 
   return (

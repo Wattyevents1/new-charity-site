@@ -4,15 +4,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import type { Tables } from "@/integrations/supabase/types";
+import { toast } from "sonner";
 
-type Membership = Tables<"memberships">;
+interface Membership {
+  id: string; donor_name: string | null; donor_email: string;
+  tier: string; status: string; created_at: string;
+}
 
 const AdminMemberships = () => {
   const [memberships, setMemberships] = useState<Membership[]>([]);
 
   useEffect(() => {
-    supabase.from("memberships").select("*").order("created_at", { ascending: false }).then(({ data }) => setMemberships(data || []));
+    const fetchMemberships = async () => {
+      const { data, error } = await supabase.functions.invoke("admin-api", {
+        body: { action: "list", entity: "memberships" },
+      });
+      if (error) { toast.error("Failed to load memberships"); return; }
+      setMemberships(Array.isArray(data) ? data : []);
+    };
+    fetchMemberships();
   }, []);
 
   return (

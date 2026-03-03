@@ -1,10 +1,13 @@
+import { useState } from "react";
 import Layout from "@/components/layout/Layout";
-import { Mail, Phone, MapPin, Clock } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const contactInfo = [
   { icon: MapPin, label: "Address", value: "Plot 9 Namakwekwe, Mbale, Uganda" },
@@ -14,6 +17,31 @@ const contactInfo = [
 ];
 
 const Contact = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !email || !message) { toast.error("Please fill in all required fields."); return; }
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("public-forms", {
+        body: { action: "submit_contact", data: { name, email, subject, message } },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Message sent! We'll get back to you soon.");
+      setName(""); setEmail(""); setSubject(""); setMessage("");
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Layout>
       <section className="bg-primary text-primary-foreground py-20 md:py-28">
@@ -41,14 +69,16 @@ const Contact = () => {
               <Card className="border-border/50 shadow-card">
                 <CardContent className="p-6 md:p-8">
                   <h2 className="font-serif text-2xl font-bold mb-6">Send a Message</h2>
-                  <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                  <form className="space-y-4" onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div><Label htmlFor="name">Full Name</Label><Input id="name" placeholder="Your name" className="mt-1" /></div>
-                      <div><Label htmlFor="email">Email</Label><Input id="email" type="email" placeholder="you@example.com" className="mt-1" /></div>
+                      <div><Label htmlFor="name">Full Name</Label><Input id="name" placeholder="Your name" className="mt-1" value={name} onChange={(e) => setName(e.target.value)} /></div>
+                      <div><Label htmlFor="email">Email</Label><Input id="email" type="email" placeholder="you@example.com" className="mt-1" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
                     </div>
-                    <div><Label htmlFor="subject">Subject</Label><Input id="subject" placeholder="How can we help?" className="mt-1" /></div>
-                    <div><Label htmlFor="message">Message</Label><Textarea id="message" placeholder="Tell us more..." rows={5} className="mt-1" /></div>
-                    <Button className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8">Send Message</Button>
+                    <div><Label htmlFor="subject">Subject</Label><Input id="subject" placeholder="How can we help?" className="mt-1" value={subject} onChange={(e) => setSubject(e.target.value)} /></div>
+                    <div><Label htmlFor="message">Message</Label><Textarea id="message" placeholder="Tell us more..." rows={5} className="mt-1" value={message} onChange={(e) => setMessage(e.target.value)} /></div>
+                    <Button type="submit" className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8" disabled={loading}>
+                      {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Sending...</> : "Send Message"}
+                    </Button>
                   </form>
                 </CardContent>
               </Card>

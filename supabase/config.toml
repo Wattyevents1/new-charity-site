@@ -2,3 +2,9 @@ project_id = "fuashqzjafotjinulyyk"
 
 [functions.pesapal-payment]
 verify_jwt = false
+
+[functions.public-forms]
+verify_jwt = false
+
+[functions.admin-api]
+verify_jwt = false

@@ -9,23 +9,24 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const fetchStats = async () => {
-      const [donations, projects, volunteers, contacts, blogPosts, itemDonations] = await Promise.all([
+      // Donations & projects still use direct queries (not in scope for edge functions)
+      const [donations, projects, adminStats] = await Promise.all([
         supabase.from("donations").select("amount"),
         supabase.from("projects").select("id", { count: "exact", head: true }),
-        supabase.from("volunteers").select("id", { count: "exact", head: true }),
-        supabase.from("contact_submissions").select("id", { count: "exact", head: true }),
-        supabase.from("blog_posts").select("id", { count: "exact", head: true }),
-        supabase.from("item_donations").select("id", { count: "exact", head: true }),
+        supabase.functions.invoke("admin-api", { body: { action: "dashboard_stats" } }),
       ]);
+
       const totalAmount = (donations.data || []).reduce((sum, d) => sum + (d.amount || 0), 0);
+      const apiStats = adminStats.data || {};
+
       setStats({
         donations: donations.data?.length || 0,
         totalAmount,
         projects: projects.count || 0,
-        volunteers: volunteers.count || 0,
-        contacts: contacts.count || 0,
-        blogPosts: blogPosts.count || 0,
-        itemDonations: itemDonations.count || 0,
+        volunteers: apiStats.volunteers || 0,
+        contacts: apiStats.contacts || 0,
+        blogPosts: apiStats.blogPosts || 0,
+        itemDonations: apiStats.itemDonations || 0,
       });
     };
     fetchStats();

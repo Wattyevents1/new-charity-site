@@ -12,9 +12,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import type { Tables } from "@/integrations/supabase/types";
 
-type BlogPost = Tables<"blog_posts">;
+interface BlogPost {
+  id: string; title: string; excerpt: string | null; content: string | null;
+  image_url: string | null; author: string | null; category: string | null;
+  status: string; created_at: string; published_at: string | null;
+}
+
 const emptyForm = { title: "", excerpt: "", content: "", image_url: "", author: "", category: "", status: "draft" };
 
 const AdminBlog = () => {
@@ -24,23 +28,23 @@ const AdminBlog = () => {
   const [open, setOpen] = useState(false);
 
   const fetchPosts = async () => {
-    const { data } = await supabase.from("blog_posts").select("*").order("created_at", { ascending: false });
-    setPosts(data || []);
+    const { data, error } = await supabase.functions.invoke("admin-api", {
+      body: { action: "list", entity: "blog_posts" },
+    });
+    if (error) { toast.error("Failed to load posts"); return; }
+    setPosts(Array.isArray(data) ? data : []);
   };
 
   useEffect(() => { fetchPosts(); }, []);
 
   const handleSave = async () => {
     const payload = { ...form, published_at: form.status === "published" ? new Date().toISOString() : null };
-    if (editingId) {
-      const { error } = await supabase.from("blog_posts").update(payload).eq("id", editingId);
-      if (error) { toast.error(error.message); return; }
-      toast.success("Post updated");
-    } else {
-      const { error } = await supabase.from("blog_posts").insert(payload);
-      if (error) { toast.error(error.message); return; }
-      toast.success("Post created");
-    }
+    const body = editingId
+      ? { action: "update", entity: "blog_posts", id: editingId, data: payload }
+      : { action: "create", entity: "blog_posts", data: payload };
+    const { data, error } = await supabase.functions.invoke("admin-api", { body });
+    if (error || data?.error) { toast.error(data?.error || "Save failed"); return; }
+    toast.success(editingId ? "Post updated" : "Post created");
     setOpen(false); setForm(emptyForm); setEditingId(null); fetchPosts();
   };
 
@@ -51,7 +55,10 @@ const AdminBlog = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this post?")) return;
-    await supabase.from("blog_posts").delete().eq("id", id);
+    const { data, error } = await supabase.functions.invoke("admin-api", {
+      body: { action: "delete", entity: "blog_posts", id },
+    });
+    if (error || data?.error) { toast.error(data?.error || "Delete failed"); return; }
     toast.success("Post deleted"); fetchPosts();
   };
 

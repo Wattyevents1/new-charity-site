@@ -1,11 +1,14 @@
+import { useState } from "react";
 import Layout from "@/components/layout/Layout";
-import { Heart, Clock, MapPin, Users } from "lucide-react";
+import { Heart, Clock, MapPin, Users, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const benefits = [
   { icon: Heart, title: "Make a Difference", description: "Directly impact lives in communities that need it most." },
@@ -15,6 +18,33 @@ const benefits = [
 ];
 
 const Volunteer = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [areaOfInterest, setAreaOfInterest] = useState("");
+  const [skills, setSkills] = useState("");
+  const [availability, setAvailability] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !email) { toast.error("Please enter your name and email."); return; }
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("public-forms", {
+        body: { action: "submit_volunteer", data: { name, email, phone, area_of_interest: areaOfInterest, skills, availability } },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Application submitted! We'll be in touch.");
+      setName(""); setEmail(""); setPhone(""); setAreaOfInterest(""); setSkills(""); setAvailability("");
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Layout>
       <section className="bg-primary text-primary-foreground py-20 md:py-28">
@@ -40,16 +70,16 @@ const Volunteer = () => {
             <Card className="border-border/50 shadow-card">
               <CardHeader><CardTitle className="font-serif text-2xl">Volunteer Registration</CardTitle></CardHeader>
               <CardContent>
-                <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                <form className="space-y-4" onSubmit={handleSubmit}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><Label htmlFor="vol-name">Full Name</Label><Input id="vol-name" placeholder="Your name" className="mt-1" /></div>
-                    <div><Label htmlFor="vol-email">Email</Label><Input id="vol-email" type="email" placeholder="you@example.com" className="mt-1" /></div>
+                    <div><Label htmlFor="vol-name">Full Name</Label><Input id="vol-name" placeholder="Your name" className="mt-1" value={name} onChange={(e) => setName(e.target.value)} /></div>
+                    <div><Label htmlFor="vol-email">Email</Label><Input id="vol-email" type="email" placeholder="you@example.com" className="mt-1" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><Label htmlFor="vol-phone">Phone</Label><Input id="vol-phone" type="tel" placeholder="+254..." className="mt-1" /></div>
+                    <div><Label htmlFor="vol-phone">Phone</Label><Input id="vol-phone" type="tel" placeholder="+254..." className="mt-1" value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
                     <div>
                       <Label>Area of Interest</Label>
-                      <Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select area" /></SelectTrigger>
+                      <Select value={areaOfInterest} onValueChange={setAreaOfInterest}><SelectTrigger className="mt-1"><SelectValue placeholder="Select area" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="education">Education</SelectItem>
                           <SelectItem value="healthcare">Healthcare</SelectItem>
@@ -61,10 +91,10 @@ const Volunteer = () => {
                       </Select>
                     </div>
                   </div>
-                  <div><Label htmlFor="vol-skills">Skills & Experience</Label><Textarea id="vol-skills" placeholder="Tell us about your skills..." rows={3} className="mt-1" /></div>
+                  <div><Label htmlFor="vol-skills">Skills & Experience</Label><Textarea id="vol-skills" placeholder="Tell us about your skills..." rows={3} className="mt-1" value={skills} onChange={(e) => setSkills(e.target.value)} /></div>
                   <div>
                     <Label>Availability</Label>
-                    <Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select availability" /></SelectTrigger>
+                    <Select value={availability} onValueChange={setAvailability}><SelectTrigger className="mt-1"><SelectValue placeholder="Select availability" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="weekdays">Weekdays</SelectItem>
                         <SelectItem value="weekends">Weekends</SelectItem>
@@ -74,7 +104,9 @@ const Volunteer = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-5">Submit Application</Button>
+                  <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-5" disabled={loading}>
+                    {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting...</> : "Submit Application"}
+                  </Button>
                 </form>
               </CardContent>
             </Card>

@@ -3,28 +3,34 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import type { Tables } from "@/integrations/supabase/types";
 
-type Volunteer = Tables<"volunteers">;
+interface Volunteer {
+  id: string; name: string; email: string; phone: string | null;
+  area_of_interest: string | null; availability: string | null; status: string; created_at: string;
+}
 
 const AdminVolunteers = () => {
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
 
-  const fetch = async () => {
-    const { data } = await supabase.from("volunteers").select("*").order("created_at", { ascending: false });
-    setVolunteers(data || []);
+  const fetchVolunteers = async () => {
+    const { data, error } = await supabase.functions.invoke("admin-api", {
+      body: { action: "list", entity: "volunteers" },
+    });
+    if (error) { toast.error("Failed to load volunteers"); return; }
+    setVolunteers(Array.isArray(data) ? data : []);
   };
 
-  useEffect(() => { fetch(); }, []);
+  useEffect(() => { fetchVolunteers(); }, []);
 
   const updateStatus = async (id: string, status: string) => {
-    await supabase.from("volunteers").update({ status }).eq("id", id);
+    const { data, error } = await supabase.functions.invoke("admin-api", {
+      body: { action: "update", entity: "volunteers", id, data: { status } },
+    });
+    if (error || data?.error) { toast.error(data?.error || "Update failed"); return; }
     toast.success(`Status updated to ${status}`);
-    fetch();
+    fetchVolunteers();
   };
 
   return (

@@ -4,26 +4,34 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import type { Tables } from "@/integrations/supabase/types";
 
-type ItemDonation = Tables<"item_donations">;
+interface ItemDonation {
+  id: string; donor_name: string; donor_email: string; donor_phone: string | null;
+  category: string | null; item_description: string; pickup_location: string | null;
+  status: string; created_at: string;
+}
 
 const AdminItemDonations = () => {
   const [items, setItems] = useState<ItemDonation[]>([]);
 
-  const fetch = async () => {
-    const { data } = await supabase.from("item_donations").select("*").order("created_at", { ascending: false });
-    setItems(data || []);
+  const fetchItems = async () => {
+    const { data, error } = await supabase.functions.invoke("admin-api", {
+      body: { action: "list", entity: "item_donations" },
+    });
+    if (error) { toast.error("Failed to load item donations"); return; }
+    setItems(Array.isArray(data) ? data : []);
   };
 
-  useEffect(() => { fetch(); }, []);
+  useEffect(() => { fetchItems(); }, []);
 
   const updateStatus = async (id: string, status: string) => {
-    await supabase.from("item_donations").update({ status }).eq("id", id);
-    toast.success(`Status updated`);
-    fetch();
+    const { data, error } = await supabase.functions.invoke("admin-api", {
+      body: { action: "update", entity: "item_donations", id, data: { status } },
+    });
+    if (error || data?.error) { toast.error(data?.error || "Update failed"); return; }
+    toast.success("Status updated");
+    fetchItems();
   };
 
   return (

@@ -1,16 +1,40 @@
+import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
-import { Briefcase, MapPin, Clock, ArrowRight } from "lucide-react";
+import { Briefcase, MapPin, Clock, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 
-const jobs = [
-  { id: 1, title: "Program Manager", location: "Nairobi, Kenya", type: "Full-time", description: "Lead and coordinate community development programs across East Africa." },
-  { id: 2, title: "Communications Officer", location: "Remote", type: "Full-time", description: "Manage digital communications, social media, and donor engagement." },
-  { id: 3, title: "Field Coordinator", location: "Kampala, Uganda", type: "Contract", description: "Coordinate field operations and volunteer teams for active projects." },
-  { id: 4, title: "Grant Writer", location: "Remote", type: "Part-time", description: "Research and write compelling grant proposals to secure funding." },
-];
+interface Career {
+  id: string;
+  title: string;
+  description: string | null;
+  requirements: string | null;
+  location: string | null;
+  employment_type: string | null;
+}
 
 const Careers = () => {
+  const [jobs, setJobs] = useState<Career[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCareers = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("public-forms", {
+          body: { action: "list_open_careers" },
+        });
+        if (error) throw error;
+        setJobs(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Failed to load careers:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCareers();
+  }, []);
+
   return (
     <Layout>
       <section className="bg-primary text-primary-foreground py-20 md:py-28">
@@ -24,25 +48,30 @@ const Careers = () => {
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4 max-w-3xl">
           <h2 className="font-serif text-2xl font-bold mb-8">Open Positions</h2>
-          <div className="space-y-4">
-            {jobs.map((job) => (
-              <Card key={job.id} className="border-border/50 hover:shadow-card transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div>
-                      <h3 className="font-serif text-lg font-semibold text-foreground mb-2">{job.title}</h3>
-                      <p className="text-sm text-muted-foreground mb-3">{job.description}</p>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {job.location}</span>
-                        <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {job.type}</span>
+          {loading ? (
+            <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>
+          ) : (
+            <div className="space-y-4">
+              {jobs.map((job) => (
+                <Card key={job.id} className="border-border/50 hover:shadow-card transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                      <div>
+                        <h3 className="font-serif text-lg font-semibold text-foreground mb-2">{job.title}</h3>
+                        {job.description && <p className="text-sm text-muted-foreground mb-3">{job.description}</p>}
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          {job.location && <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {job.location}</span>}
+                          {job.employment_type && <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {job.employment_type}</span>}
+                        </div>
                       </div>
+                      <Button variant="outline" className="shrink-0 gap-1">Apply <ArrowRight className="w-4 h-4" /></Button>
                     </div>
-                    <Button variant="outline" className="shrink-0 gap-1">Apply <ArrowRight className="w-4 h-4" /></Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {jobs.length === 0 && <div className="text-center py-16 text-muted-foreground"><p className="text-lg">No open positions at this time.</p></div>}
+            </div>
+          )}
         </div>
       </section>
     </Layout>
