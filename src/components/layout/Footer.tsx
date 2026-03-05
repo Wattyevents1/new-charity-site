@@ -19,7 +19,7 @@ const Footer = () => {
               {[
                 { href: "https://www.facebook.com/alimranmuslimaid1/", icon: <Facebook className="w-4 h-4" />, label: "Facebook" },
                 { href: "https://www.tiktok.com/@al_imran_muslim_aid", icon: <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.88-2.88 2.89 2.89 0 0 1 2.88-2.88c.28 0 .56.04.81.1v-3.5a6.37 6.37 0 0 0-.81-.05A6.34 6.34 0 0 0 3.15 15a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.73a8.19 8.19 0 0 0 4.76 1.52v-3.4a4.85 4.85 0 0 1-1-.16z"/></svg>, label: "TikTok" },
-                { href: "#", icon: <Instagram className="w-4 h-4" />, label: "Instagram" },
+                { href: "https://www.instagram.com/alimranmuslimaid/", icon: <Instagram className="w-4 h-4" />, label: "Instagram" },
                 { href: "#", icon: <Youtube className="w-4 h-4" />, label: "YouTube" },
               ].map((social) => (
                 <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 flex items-center justify-center transition-colors" aria-label={social.label}>
