@@ -1,13 +1,36 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AlertTriangle, Clock, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { supabase } from "@/integrations/supabase/client";
+import { useProjectDonations } from "@/hooks/useProjectDonations";
 
 const UrgentAppeals = () => {
-  const daysLeft = 12;
-  const goal = 100000;
-  const raised = 67000;
-  const percentage = Math.round((raised / goal) * 100);
+  const [appeal, setAppeal] = useState<any>(null);
+  const donationTotals = useProjectDonations();
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("status", "published")
+        .eq("category", "Emergency Relief")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setAppeal(data);
+    };
+    fetch();
+  }, []);
+
+  if (!appeal) return null;
+
+  const goal = appeal.funding_goal || 1;
+  const donated = donationTotals[appeal.id];
+  const raised = donated ? donated.total_amount : (appeal.amount_raised || 0);
+  const percentage = Math.min(Math.round((raised / goal) * 100), 100);
 
   return (
     <section className="py-16 md:py-24 bg-primary text-primary-foreground relative overflow-hidden">
@@ -24,10 +47,10 @@ const UrgentAppeals = () => {
           </div>
 
           <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            Emergency Flood Relief
+            {appeal.title}
           </h2>
           <p className="text-primary-foreground/80 max-w-2xl mx-auto mb-8 text-lg">
-            Thousands of families have been displaced by severe flooding. Your urgent support provides shelter, food, and medical aid to those in desperate need.
+            {appeal.description}
           </p>
 
           <div className="max-w-md mx-auto mb-8">
@@ -38,10 +61,6 @@ const UrgentAppeals = () => {
             <Progress value={percentage} className="h-3 bg-primary-foreground/20" />
             <div className="flex justify-between items-center mt-2">
               <span className="text-sm text-primary-foreground/70">{percentage}% complete</span>
-              <div className="flex items-center gap-1 text-sm text-charity-gold">
-                <Clock className="w-3.5 h-3.5" />
-                <span>{daysLeft} days left</span>
-              </div>
             </div>
           </div>
 

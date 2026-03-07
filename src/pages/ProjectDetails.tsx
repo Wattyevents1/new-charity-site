@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { useProjectDonations } from "@/hooks/useProjectDonations";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects">;
@@ -14,6 +15,7 @@ const ProjectDetails = () => {
   const { id } = useParams();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
+  const donationTotals = useProjectDonations();
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -47,7 +49,9 @@ const ProjectDetails = () => {
   }
 
   const goal = project.funding_goal || 1;
-  const raised = project.amount_raised || 0;
+  const donated = donationTotals[project.id];
+  const raised = donated ? donated.total_amount : (project.amount_raised || 0);
+  const donorsCount = donated ? donated.donors_count : (project.donors_count || 0);
   const percentage = Math.min(Math.round((raised / goal) * 100), 100);
   const galleryUrls = Array.isArray(project.gallery_urls) ? (project.gallery_urls as string[]) : [];
 
@@ -88,7 +92,7 @@ const ProjectDetails = () => {
                 </div>
               )}
               <div className="grid grid-cols-3 gap-4">
-                <Card className="border-border/50"><CardContent className="p-4 text-center"><Users className="w-6 h-6 text-accent mx-auto mb-2" /><p className="font-serif text-xl font-bold">{project.donors_count || 0}</p><p className="text-xs text-muted-foreground">Donors</p></CardContent></Card>
+                <Card className="border-border/50"><CardContent className="p-4 text-center"><Users className="w-6 h-6 text-accent mx-auto mb-2" /><p className="font-serif text-xl font-bold">{donorsCount}</p><p className="text-xs text-muted-foreground">Donors</p></CardContent></Card>
                 <Card className="border-border/50"><CardContent className="p-4 text-center"><MapPin className="w-6 h-6 text-accent mx-auto mb-2" /><p className="font-serif text-xl font-bold">{(project.location || "").split(",")[0]}</p><p className="text-xs text-muted-foreground">Location</p></CardContent></Card>
                 <Card className="border-border/50"><CardContent className="p-4 text-center"><Calendar className="w-6 h-6 text-accent mx-auto mb-2" /><p className="font-serif text-xl font-bold">{project.start_date ? new Date(project.start_date).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "N/A"}</p><p className="text-xs text-muted-foreground">Started</p></CardContent></Card>
               </div>
@@ -101,7 +105,7 @@ const ProjectDetails = () => {
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between text-sm"><span className="font-semibold">${raised.toLocaleString()}</span><span className="text-muted-foreground">of ${goal.toLocaleString()}</span></div>
                     <Progress value={percentage} className="h-3" />
-                    <div className="flex justify-between text-xs text-muted-foreground"><span>{percentage}% funded</span><span>{project.donors_count || 0} donors</span></div>
+                    <div className="flex justify-between text-xs text-muted-foreground"><span>{percentage}% funded</span><span>{donorsCount} donors</span></div>
                   </div>
                   <Link to="/donate"><Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-5 mb-3"><Heart className="w-4 h-4 mr-2 fill-current" />Donate Now</Button></Link>
                   <Button variant="outline" className="w-full gap-2"><Share2 className="w-4 h-4" />Share This Project</Button>

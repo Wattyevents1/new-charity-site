@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
+import { useProjectDonations } from "@/hooks/useProjectDonations";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects">;
@@ -15,6 +16,7 @@ const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const donationTotals = useProjectDonations();
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -68,7 +70,8 @@ const Projects = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {filtered.map((project) => {
               const goal = project.funding_goal || 1;
-              const raised = project.amount_raised || 0;
+              const donated = donationTotals[project.id];
+              const raised = donated ? donated.total_amount : (project.amount_raised || 0);
               const percentage = Math.min(Math.round((raised / goal) * 100), 100);
               return (
                 <Card key={project.id} className="overflow-hidden group hover:shadow-elevated transition-all duration-300 border-border/50">
