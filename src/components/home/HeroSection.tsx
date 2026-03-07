@@ -50,7 +50,7 @@ const HeroSection = () => {
             <div className="w-px h-4 bg-primary-foreground/20" />
             <span>50+ Projects</span>
             <div className="w-px h-4 bg-primary-foreground/20" />
-            <span>20+ Countries</span>
+            <span>2 Countries</span>
           </div>
         </div>
       </div>
