@@ -45,7 +45,7 @@ const HeroSection = () => {
           <div className="mt-12 flex items-center justify-center gap-8 text-sm text-primary-foreground/70 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4" />
-              <span>10,000+ Donors</span>
+              <span>50+ Donors</span>
             </div>
             <div className="w-px h-4 bg-primary-foreground/20" />
             <span>50+ Projects</span>
