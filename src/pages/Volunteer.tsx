@@ -208,7 +208,7 @@ const Volunteer = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       toast.success("Application submitted! We'll be in touch.");
-      setName(""); setEmail(""); setPhone(""); setCountryCode("+256"); setAreaOfInterest(""); setSkills(""); setAvailability("");
+      setName(""); setEmail(""); setPhone(""); setCountryCode("US +1"); setAreaOfInterest(""); setSkills(""); setAvailability("");
     } catch (err: any) {
       toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
