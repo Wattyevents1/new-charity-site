@@ -1,13 +1,14 @@
 import { Quote } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import namulwaImg from "@/assets/testimonial-namulwa.jpg";
 
 const testimonials = [
   {
     id: 1,
     quote: "Alhamdulillah, Al-Imran Muslim Aid built a borehole in our village in Pallisa. My children no longer walk miles for water. May Allah reward every donor.",
-    name: "Babirye Nabirye",
+    name: "Namulwa Halima",
     role: "Beneficiary, Pallisa",
-    avatar: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=100&h=100&fit=crop&crop=face",
+    avatar: namulwaImg,
   },
   {
     id: 2,
