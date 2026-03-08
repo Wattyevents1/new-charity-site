@@ -21,7 +21,7 @@ const AdminDonations = () => {
     <AdminLayout>
       <div className="mb-6">
         <h1 className="font-serif text-3xl font-bold">Donations</h1>
-        <p className="text-muted-foreground mt-1">Total: ${totalAmount.toLocaleString()} from {donations.length} donations</p>
+        <p className="text-muted-foreground mt-1">Total: €{totalAmount.toLocaleString()} from {donations.length} donations</p>
       </div>
       <Card className="border-border/50">
         <CardContent className="p-0">
