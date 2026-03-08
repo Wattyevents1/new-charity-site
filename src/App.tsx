@@ -40,6 +40,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <CurrencyProvider>
       <AuthProvider>
         <BrowserRouter>
           <Routes>
