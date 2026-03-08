@@ -6,11 +6,11 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Pesapal sandbox URLs (test mode)
-const PESAPAL_AUTH_URL = "https://cybqa.pesapal.com/pesapalv3/api/Auth/RequestToken";
-const PESAPAL_SUBMIT_ORDER_URL = "https://cybqa.pesapal.com/pesapalv3/api/Transactions/SubmitOrderRequest";
-const PESAPAL_IPN_URL = "https://cybqa.pesapal.com/pesapalv3/api/URLSetup/RegisterIPN";
-const PESAPAL_TX_STATUS_URL = "https://cybqa.pesapal.com/pesapalv3/api/Transactions/GetTransactionStatus";
+// Pesapal live URLs (production mode)
+const PESAPAL_AUTH_URL = "https://pay.pesapal.com/v3/api/Auth/RequestToken";
+const PESAPAL_SUBMIT_ORDER_URL = "https://pay.pesapal.com/v3/api/Transactions/SubmitOrderRequest";
+const PESAPAL_IPN_URL = "https://pay.pesapal.com/v3/api/URLSetup/RegisterIPN";
+const PESAPAL_TX_STATUS_URL = "https://pay.pesapal.com/v3/api/Transactions/GetTransactionStatus";
 
 async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs = 15000): Promise<Response> {
   const controller = new AbortController();
