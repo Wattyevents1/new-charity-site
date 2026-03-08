@@ -56,19 +56,21 @@ const AdminDashboard = () => {
             <p className="text-muted-foreground mt-1">Welcome back. Here's an overview of your organization.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {cards.map((card) => (
-          <Card key={card.label} className="border-border/50">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{card.label}</CardTitle>
-              <card.icon className={`w-5 h-5 ${card.color}`} />
-            </CardHeader>
-            <CardContent>
-              <div className="font-serif text-2xl font-bold">{card.value}</div>
-              <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            {cards.map((card) => (
+              <Card key={card.label} className="border-border/50">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{card.label}</CardTitle>
+                  <card.icon className={`w-5 h-5 ${card.color}`} />
+                </CardHeader>
+                <CardContent>
+                  <div className="font-serif text-2xl font-bold">{card.value}</div>
+                  <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
     </AdminLayout>
   );
 };
