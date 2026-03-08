@@ -250,10 +250,10 @@ const Volunteer = () => {
                     <div><Label htmlFor="vol-phone">Phone</Label>
                       <div className="flex gap-2 mt-1">
                         <Select value={countryCode} onValueChange={setCountryCode}>
-                          <SelectTrigger className="w-[140px] shrink-0"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {countryCodes.map((c) => (
-                              <SelectItem key={c.code} value={c.code}>{c.country} ({c.code})</SelectItem>
+                          <SelectTrigger className="w-[130px] shrink-0"><SelectValue /></SelectTrigger>
+                          <SelectContent className="max-h-60">
+                            {countryCodes.map((c, i) => (
+                              <SelectItem key={`${c.country}-${i}`} value={`${c.country} ${c.code}`}>{c.country} {c.code}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
