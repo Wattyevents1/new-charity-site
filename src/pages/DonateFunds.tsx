@@ -185,7 +185,7 @@ const DonateFunds = () => {
                                 toast.info("Payment cancelled.");
                               }}
                             />
-                            <p className="text-xs text-muted-foreground text-center mt-3">🔒 Sandbox mode — for testing only</p>
+                            <p className="text-xs text-muted-foreground text-center mt-3">🔒 Secured by PayPal</p>
                           </div>
                         </PayPalScriptProvider>
                       ) : (
