@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useCurrency } from "@/hooks/useCurrency";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects">;
