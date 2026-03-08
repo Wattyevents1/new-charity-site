@@ -50,7 +50,7 @@ const AdminDashboard = () => {
       {loading ? (
         <LogoSpinner message="Loading dashboard..." />
       ) : (
-        <>
+        <div className="animate-fade-in">
           <div className="mb-8">
             <h1 className="font-serif text-3xl font-bold text-foreground">Dashboard</h1>
             <p className="text-muted-foreground mt-1">Welcome back. Here's an overview of your organization.</p>
@@ -69,7 +69,7 @@ const AdminDashboard = () => {
               </Card>
             ))}
           </div>
-        </>
+        </div>
       )}
     </AdminLayout>
   );

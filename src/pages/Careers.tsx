@@ -52,7 +52,7 @@ const Careers = () => {
           {loading ? (
             <LogoSpinner message="Loading positions..." />
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 animate-fade-in">
               {jobs.map((job) => (
                 <Card key={job.id} className="border-border/50 hover:shadow-card transition-shadow">
                   <CardContent className="p-6">

@@ -51,7 +51,7 @@ const UrgentAppealsPage = () => {
               <p className="text-lg">No urgent appeals at this time. Check back soon.</p>
             </div>
           )}
-          <div className="space-y-8">
+          <div className="space-y-8 animate-fade-in">
             {appeals.map((appeal) => {
               const goal = appeal.funding_goal || 1;
               const donated = donationTotals[appeal.id];

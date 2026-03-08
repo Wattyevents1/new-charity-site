@@ -64,7 +64,7 @@ const Blog = () => {
           {loading ? (
             <LogoSpinner message="Loading articles..." />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 animate-fade-in">
               {filtered.map((post) => (
                 <Card key={post.id} className="overflow-hidden group hover:shadow-elevated transition-all duration-300 border-border/50">
                   {post.image_url && (

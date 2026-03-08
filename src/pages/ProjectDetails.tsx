@@ -60,7 +60,7 @@ const ProjectDetails = () => {
 
   return (
     <Layout>
-      <div className="relative h-[40vh] md:h-[50vh] overflow-hidden">
+      <div className="relative h-[40vh] md:h-[50vh] overflow-hidden animate-fade-in">
         <img src={project.image_url || "/placeholder.svg"} alt={project.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
