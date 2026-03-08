@@ -10,6 +10,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+const countryCodes = [
+  { code: "+256", country: "🇺🇬 Uganda" },
+  { code: "+254", country: "🇰🇪 Kenya" },
+  { code: "+255", country: "🇹🇿 Tanzania" },
+  { code: "+250", country: "🇷🇼 Rwanda" },
+  { code: "+257", country: "🇧🇮 Burundi" },
+  { code: "+211", country: "🇸🇸 South Sudan" },
+  { code: "+243", country: "🇨🇩 DR Congo" },
+  { code: "+44", country: "🇬🇧 UK" },
+  { code: "+1", country: "🇺🇸 USA" },
+  { code: "+971", country: "🇦🇪 UAE" },
+  { code: "+966", country: "🇸🇦 Saudi Arabia" },
+  { code: "+91", country: "🇮🇳 India" },
+  { code: "+92", country: "🇵🇰 Pakistan" },
+  { code: "+60", country: "🇲🇾 Malaysia" },
+  { code: "+49", country: "🇩🇪 Germany" },
+  { code: "+33", country: "🇫🇷 France" },
+  { code: "+27", country: "🇿🇦 South Africa" },
+  { code: "+234", country: "🇳🇬 Nigeria" },
+  { code: "+233", country: "🇬🇭 Ghana" },
+  { code: "+251", country: "🇪🇹 Ethiopia" },
+];
+
 const benefits = [
   { icon: Heart, title: "Make a Difference", description: "Directly impact lives in communities that need it most." },
   { icon: Users, title: "Join a Community", description: "Connect with like-minded people who share your passion." },
@@ -20,6 +43,7 @@ const benefits = [
 const Volunteer = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [countryCode, setCountryCode] = useState("+256");
   const [phone, setPhone] = useState("");
   const [areaOfInterest, setAreaOfInterest] = useState("");
   const [skills, setSkills] = useState("");
