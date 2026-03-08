@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { AlertTriangle, Clock, Heart, MapPin } from "lucide-react";
+import LogoSpinner from "@/components/ui/LogoSpinner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -14,6 +15,7 @@ type Project = Tables<"projects">;
 
 const UrgentAppealsPage = () => {
   const [appeals, setAppeals] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
   const donationTotals = useProjectDonations();
   const { formatAmount } = useCurrency();
 
@@ -26,6 +28,7 @@ const UrgentAppealsPage = () => {
         .eq("category", "Emergency Relief")
         .order("created_at", { ascending: false });
       setAppeals(data || []);
+      setLoading(false);
     };
     fetch();
   }, []);
@@ -42,7 +45,8 @@ const UrgentAppealsPage = () => {
 
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4 max-w-4xl">
-          {appeals.length === 0 && (
+          {loading && <LogoSpinner message="Loading appeals..." />}
+          {!loading && appeals.length === 0 && (
             <div className="text-center py-16 text-muted-foreground">
               <p className="text-lg">No urgent appeals at this time. Check back soon.</p>
             </div>

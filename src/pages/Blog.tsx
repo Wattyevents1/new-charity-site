@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
-import { Search, Calendar, User, ArrowRight, Loader2 } from "lucide-react";
+import { Search, Calendar, User, ArrowRight } from "lucide-react";
+import LogoSpinner from "@/components/ui/LogoSpinner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -61,7 +62,7 @@ const Blog = () => {
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>
+            <LogoSpinner message="Loading articles..." />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               {filtered.map((post) => (

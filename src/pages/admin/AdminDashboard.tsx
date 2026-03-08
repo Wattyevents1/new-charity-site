@@ -4,9 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, Users, FolderKanban, Mail, FileText, Package } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
+import LogoSpinner from "@/components/ui/LogoSpinner";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({ donations: 0, totalAmount: 0, projects: 0, volunteers: 0, contacts: 0, blogPosts: 0, itemDonations: 0 });
+  const [loading, setLoading] = useState(true);
   const { formatAmount } = useCurrency();
 
   useEffect(() => {
@@ -29,6 +31,7 @@ const AdminDashboard = () => {
         blogPosts: apiStats.blogPosts || 0,
         itemDonations: apiStats.itemDonations || 0,
       });
+      setLoading(false);
     };
     fetchStats();
   }, []);
@@ -44,24 +47,30 @@ const AdminDashboard = () => {
 
   return (
     <AdminLayout>
-      <div className="mb-8">
-        <h1 className="font-serif text-3xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Welcome back. Here's an overview of your organization.</p>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {cards.map((card) => (
-          <Card key={card.label} className="border-border/50">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{card.label}</CardTitle>
-              <card.icon className={`w-5 h-5 ${card.color}`} />
-            </CardHeader>
-            <CardContent>
-              <div className="font-serif text-2xl font-bold">{card.value}</div>
-              <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {loading ? (
+        <LogoSpinner message="Loading dashboard..." />
+      ) : (
+        <>
+          <div className="mb-8">
+            <h1 className="font-serif text-3xl font-bold text-foreground">Dashboard</h1>
+            <p className="text-muted-foreground mt-1">Welcome back. Here's an overview of your organization.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {cards.map((card) => (
+              <Card key={card.label} className="border-border/50">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{card.label}</CardTitle>
+                  <card.icon className={`w-5 h-5 ${card.color}`} />
+                </CardHeader>
+                <CardContent>
+                  <div className="font-serif text-2xl font-bold">{card.value}</div>
+                  <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
     </AdminLayout>
   );
 };

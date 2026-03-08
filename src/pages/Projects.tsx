@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import logo from "@/assets/logo.jpg";
+import LogoSpinner from "@/components/ui/LogoSpinner";
 import { Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { MapPin, Search } from "lucide-react";
@@ -111,7 +111,7 @@ const Projects = () => {
               );
             })}
           </div>
-          {loading && <div className="text-center py-16 flex flex-col items-center gap-4"><div className="relative w-16 h-16"><div className="absolute inset-0 rounded-full border-4 border-primary/30 border-t-primary animate-spin"></div><img src={logo} alt="Loading" className="w-12 h-12 rounded-full object-cover absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" /></div><p className="text-muted-foreground">Loading projects...</p></div>}
+          {loading && <LogoSpinner message="Loading projects..." />}
           {!loading && filtered.length === 0 && <div className="text-center py-16 text-muted-foreground"><p className="text-lg">No projects found matching your search.</p></div>}
         </div>
       </section>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
-import { Briefcase, MapPin, Clock, ArrowRight, Loader2 } from "lucide-react";
+import { Briefcase, MapPin, Clock, ArrowRight } from "lucide-react";
+import LogoSpinner from "@/components/ui/LogoSpinner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,7 +50,7 @@ const Careers = () => {
         <div className="container mx-auto px-4 max-w-3xl">
           <h2 className="font-serif text-2xl font-bold mb-8">Open Positions</h2>
           {loading ? (
-            <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>
+            <LogoSpinner message="Loading positions..." />
           ) : (
             <div className="space-y-4">
               {jobs.map((job) => (
