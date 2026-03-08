@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
-const PAYPAL_CLIENT_ID = "sb"; // sandbox test client ID
+const PAYPAL_CLIENT_ID = "AVg184leR4hkSejOrXXrgMxTfsNE_-615TFTRmCrY8uZ073C8YiBM6VzdXRJtZXAYFIi-YcNrHS_tpNb";
 
 const presetAmounts = [10, 25, 50, 100, 250, 500];
 
@@ -185,7 +185,7 @@ const DonateFunds = () => {
                                 toast.info("Payment cancelled.");
                               }}
                             />
-                            <p className="text-xs text-muted-foreground text-center mt-3">🔒 Sandbox mode — for testing only</p>
+                            <p className="text-xs text-muted-foreground text-center mt-3">🔒 Secured by PayPal</p>
                           </div>
                         </PayPalScriptProvider>
                       ) : (
