@@ -15,6 +15,7 @@ type Project = Tables<"projects">;
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const donationTotals = useProjectDonations();
