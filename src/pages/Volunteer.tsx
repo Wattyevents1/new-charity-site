@@ -194,7 +194,7 @@ const benefits = [
 const Volunteer = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [countryCode, setCountryCode] = useState("US +1");
+  const [countryCode, setCountryCode] = useState("🇺🇸 +1");
   const [phone, setPhone] = useState("");
   const [areaOfInterest, setAreaOfInterest] = useState("");
   const [skills, setSkills] = useState("");
