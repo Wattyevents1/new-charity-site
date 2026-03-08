@@ -31,6 +31,7 @@ const AdminDashboard = () => {
         blogPosts: apiStats.blogPosts || 0,
         itemDonations: apiStats.itemDonations || 0,
       });
+      setLoading(false);
     };
     fetchStats();
   }, []);

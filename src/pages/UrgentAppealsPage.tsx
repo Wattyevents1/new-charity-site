@@ -45,10 +45,12 @@ const UrgentAppealsPage = () => {
 
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4 max-w-4xl">
-          {appeals.length === 0 && (
+          {loading && <LogoSpinner message="Loading appeals..." />}
+          {!loading && appeals.length === 0 && (
             <div className="text-center py-16 text-muted-foreground">
               <p className="text-lg">No urgent appeals at this time. Check back soon.</p>
             </div>
+          )}
           )}
           <div className="space-y-8">
             {appeals.map((appeal) => {
