@@ -44,6 +44,7 @@ const AdminDashboard = () => {
     { label: "Blog Posts", value: stats.blogPosts, sub: "Published & drafts", icon: FileText, color: "text-charity-gold" },
     { label: "Contact Messages", value: stats.contacts, sub: "Inbox", icon: Mail, color: "text-charity-orange" },
     { label: "Item Donations", value: stats.itemDonations, sub: "Submissions", icon: Package, color: "text-primary" },
+    { label: "Memberships", value: stats.memberships, sub: "Active members", icon: Crown, color: "text-charity-gold" },
   ];
 
   return (
