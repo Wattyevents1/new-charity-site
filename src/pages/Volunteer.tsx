@@ -28,7 +28,7 @@ const Volunteer = () => {
   const [availability, setAvailability] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const getDialCode = () => countryCode.split("|")[1] || "+1";
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
