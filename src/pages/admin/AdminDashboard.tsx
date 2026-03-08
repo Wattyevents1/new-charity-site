@@ -33,7 +33,7 @@ const AdminDashboard = () => {
   }, []);
 
   const cards = [
-    { label: "Total Donations", value: `$${stats.totalAmount.toLocaleString()}`, sub: `${stats.donations} donations`, icon: Heart, color: "text-accent" },
+    { label: "Total Donations", value: `€${stats.totalAmount.toLocaleString()}`, sub: `${stats.donations} donations`, icon: Heart, color: "text-accent" },
     { label: "Projects", value: stats.projects, sub: "Total projects", icon: FolderKanban, color: "text-primary" },
     { label: "Volunteers", value: stats.volunteers, sub: "Applications", icon: Users, color: "text-charity-green-light" },
     { label: "Blog Posts", value: stats.blogPosts, sub: "Published & drafts", icon: FileText, color: "text-charity-gold" },

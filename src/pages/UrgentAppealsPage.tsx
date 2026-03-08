@@ -63,7 +63,7 @@ const UrgentAppealsPage = () => {
                       )}
                       <p className="text-muted-foreground text-sm mb-6">{appeal.description}</p>
                       <div className="space-y-2 mb-6">
-                        <div className="flex justify-between text-sm"><span className="font-semibold">${raised.toLocaleString()}</span><span className="text-muted-foreground">of ${goal.toLocaleString()}</span></div>
+                        <div className="flex justify-between text-sm"><span className="font-semibold">€{raised.toLocaleString()}</span><span className="text-muted-foreground">of €{goal.toLocaleString()}</span></div>
                         <Progress value={percentage} className="h-2.5" />
                         <div className="flex justify-between items-center"><span className="text-xs text-muted-foreground">{percentage}% funded</span></div>
                       </div>

@@ -55,8 +55,8 @@ const UrgentAppeals = () => {
 
           <div className="max-w-md mx-auto mb-8">
             <div className="flex justify-between text-sm mb-2">
-              <span className="font-semibold">${raised.toLocaleString()} raised</span>
-              <span className="text-primary-foreground/70">Goal: ${goal.toLocaleString()}</span>
+               <span className="font-semibold">€{raised.toLocaleString()} raised</span>
+               <span className="text-primary-foreground/70">Goal: €{goal.toLocaleString()}</span>
             </div>
             <Progress value={percentage} className="h-3 bg-primary-foreground/20" />
             <div className="flex justify-between items-center mt-2">

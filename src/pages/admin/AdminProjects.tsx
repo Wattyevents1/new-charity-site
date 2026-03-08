@@ -73,7 +73,7 @@ const AdminProjects = () => {
                 <div><Label>Location</Label><Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} className="mt-1" /></div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div><Label>Funding Goal ($)</Label><Input type="number" value={form.funding_goal} onChange={(e) => setForm({ ...form, funding_goal: Number(e.target.value) })} className="mt-1" /></div>
+                <div><Label>Funding Goal (€)</Label><Input type="number" value={form.funding_goal} onChange={(e) => setForm({ ...form, funding_goal: Number(e.target.value) })} className="mt-1" /></div>
                 <div><Label>Start Date</Label><Input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} className="mt-1" /></div>
               </div>
               <div><Label>Image URL</Label><Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} className="mt-1" /></div>
@@ -114,8 +114,8 @@ const AdminProjects = () => {
                   <TableCell className="font-medium">{p.title}</TableCell>
                   <TableCell>{p.category}</TableCell>
                   <TableCell><Badge variant={p.status === "published" ? "default" : "secondary"}>{p.status}</Badge></TableCell>
-                  <TableCell>${(p.funding_goal || 0).toLocaleString()}</TableCell>
-                  <TableCell>${(p.amount_raised || 0).toLocaleString()}</TableCell>
+                  <TableCell>€{(p.funding_goal || 0).toLocaleString()}</TableCell>
+                  <TableCell>€{(p.amount_raised || 0).toLocaleString()}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       <Button size="icon" variant="ghost" onClick={() => handleEdit(p)}><Pencil className="w-4 h-4" /></Button>
