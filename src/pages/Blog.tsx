@@ -83,7 +83,10 @@ const Blog = () => {
                     </div>
                     <h3 className="font-serif text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">{post.title}</h3>
                     {post.excerpt && <p className="text-muted-foreground text-sm mb-4">{post.excerpt}</p>}
-                    <Button variant="link" className="p-0 h-auto text-accent font-semibold gap-1">Read More <ArrowRight className="w-4 h-4" /></Button>
+                    <div className="flex items-center justify-between">
+                      <Button variant="link" className="p-0 h-auto text-accent font-semibold gap-1">Read More <ArrowRight className="w-4 h-4" /></Button>
+                      <SocialShareButtons url={`${window.location.origin}/blog/${post.id}`} title={post.title} />
+                    </div>
                   </CardContent>
                 </Card>
               ))}
