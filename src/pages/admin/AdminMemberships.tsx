@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
 interface Membership {
@@ -14,16 +15,24 @@ interface Membership {
 const AdminMemberships = () => {
   const [memberships, setMemberships] = useState<Membership[]>([]);
 
-  useEffect(() => {
-    const fetchMemberships = async () => {
-      const { data, error } = await supabase.functions.invoke("admin-api", {
-        body: { action: "list", entity: "memberships" },
-      });
-      if (error) { toast.error("Failed to load memberships"); return; }
-      setMemberships(Array.isArray(data) ? data : []);
-    };
+  const fetchMemberships = async () => {
+    const { data, error } = await supabase.functions.invoke("admin-api", {
+      body: { action: "list", entity: "memberships" },
+    });
+    if (error) { toast.error("Failed to load memberships"); return; }
+    setMemberships(Array.isArray(data) ? data : []);
+  };
+
+  useEffect(() => { fetchMemberships(); }, []);
+
+  const updateStatus = async (id: string, status: string) => {
+    const { data, error } = await supabase.functions.invoke("admin-api", {
+      body: { action: "update", entity: "memberships", id, data: { status } },
+    });
+    if (error || data?.error) { toast.error(data?.error || "Update failed"); return; }
+    toast.success("Status updated");
     fetchMemberships();
-  }, []);
+  };
 
   return (
     <AdminLayout>
@@ -49,7 +58,16 @@ const AdminMemberships = () => {
                   <TableCell className="font-medium">{m.donor_name || "—"}</TableCell>
                   <TableCell>{m.donor_email}</TableCell>
                   <TableCell><Badge variant="outline">{m.tier}</Badge></TableCell>
-                  <TableCell><Badge variant={m.status === "active" ? "default" : "secondary"}>{m.status}</Badge></TableCell>
+                  <TableCell>
+                    <Select value={m.status} onValueChange={(val) => updateStatus(m.id, val)}>
+                      <SelectTrigger className="w-28 h-8"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="suspended">Suspended</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
                   <TableCell>{new Date(m.created_at).toLocaleDateString()}</TableCell>
                 </TableRow>
               ))}
