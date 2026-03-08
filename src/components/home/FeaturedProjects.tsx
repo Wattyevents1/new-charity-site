@@ -30,7 +30,7 @@ const FeaturedProjects = () => {
   }, []);
 
   return (
-    <section className="py-16 md:py-24 bg-amber-50">
+    <section className="py-16 md:py-24 bg-[hsl(42,80%,92%)]">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
           <div>
