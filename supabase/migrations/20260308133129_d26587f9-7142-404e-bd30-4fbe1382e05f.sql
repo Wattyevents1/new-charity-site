@@ -1,0 +1,1 @@
+UPDATE public.projects SET amount_raised = 0, donors_count = 0;
