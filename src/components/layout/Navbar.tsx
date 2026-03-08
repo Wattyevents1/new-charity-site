@@ -73,11 +73,9 @@ const Navbar = () => {
                 to={link.path}
                 onClick={() => setIsOpen(false)}
                 className={`px-4 py-3 rounded-md text-sm font-medium transition-colors ${
-                  link.highlight
-                    ? "text-[hsl(25,95%,53%)] hover:bg-[hsl(25,95%,53%)]/10 font-bold"
-                    : location.pathname === link.path
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  location.pathname === link.path
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
                 {link.label}
