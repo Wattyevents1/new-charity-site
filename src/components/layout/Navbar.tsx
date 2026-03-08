@@ -45,6 +45,7 @@ const Navbar = () => {
         </div>
 
         <div className="hidden lg:flex items-center gap-3">
+          <CurrencySelector />
           <Link to="/donate">
             <Button className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-6">
               <Heart className="w-4 h-4 mr-1" />
