@@ -75,7 +75,7 @@ const PrivacyPolicy = () => {
             <ul className="list-disc pl-6 space-y-1 text-muted-foreground leading-relaxed">
               <li>By Email: alimranmuslimaid@gmail.com</li>
               <li>By Phone: +256701703951 (Monday-Friday 9:00am-6:00pm, Saturday 10:00am-5:00pm)</li>
-              <li>By Post: Al-Imran Muslim Aid, Mbale-Moroto Road, Mbale Uganda.</li>
+              <li>By Post: Al-Imran Muslim Aid, Plot 9 Namakwekwe, Mbale, Uganda.</li>
             </ul>
           </div>
 
