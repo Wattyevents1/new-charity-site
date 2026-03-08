@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Users, FolderKanban, Mail, FileText, Package } from "lucide-react";
+import { Heart, Users, FolderKanban, Mail, FileText, Package, Crown } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import LogoSpinner from "@/components/ui/LogoSpinner";
 
