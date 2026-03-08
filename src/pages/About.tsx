@@ -73,8 +73,8 @@ const About = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-border/50">
-              <CardContent className="p-8">
+            <Card className="border-border/50 h-full">
+              <CardContent className="p-8 h-full flex flex-col">
                 <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
                   <MapPin className="w-7 h-7 text-primary" />
                 </div>
