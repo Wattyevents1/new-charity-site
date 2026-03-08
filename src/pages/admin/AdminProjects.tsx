@@ -24,6 +24,7 @@ const AdminProjects = () => {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const { formatAmount } = useCurrency();
 
   const fetchProjects = async () => {
     const { data } = await supabase.from("projects").select("*").order("created_at", { ascending: false });
