@@ -69,7 +69,7 @@ const AdminDashboard = () => {
               </Card>
             ))}
           </div>
-        </>
+        </div>
       )}
     </AdminLayout>
   );
