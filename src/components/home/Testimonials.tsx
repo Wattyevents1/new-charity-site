@@ -4,9 +4,9 @@ import { Card, CardContent } from "@/components/ui/card";
 const testimonials = [
   {
     id: 1,
-    quote: "Alhamdulillah, Al-Imran Muslim Aid built a borehole in our village in Karamoja. My children no longer walk miles for water. May Allah reward every donor.",
-    name: "Fatimah Nabirye",
-    role: "Beneficiary, Karamoja",
+    quote: "Alhamdulillah, Al-Imran Muslim Aid built a borehole in our village in Pallisa. My children no longer walk miles for water. May Allah reward every donor.",
+    name: "Babirye Nabirye",
+    role: "Beneficiary, Pallisa",
     avatar: "https://images.unsplash.com/photo-1618151313441-bc79b11e5090?w=100&h=100&fit=crop&crop=face",
   },
   {
