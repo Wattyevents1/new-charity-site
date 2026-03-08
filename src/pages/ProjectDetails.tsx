@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { MapPin, Heart, Users, Calendar, ArrowLeft, Share2 } from "lucide-react";
+import LogoSpinner from "@/components/ui/LogoSpinner";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
