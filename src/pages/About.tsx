@@ -129,7 +129,7 @@ const About = () => {
             {[
               { name: "Watiti Imran", role: "Chairperson", image: teamImran },
               { name: "Webisa Twaha", role: "Secretary", image: teamTwaha },
-              { name: "Ndelema Mariam", role: "Treasurer", image: teamMariam },
+              { name: "Khaukha Mariam", role: "Treasurer", image: teamMariam },
             ].map((member) => (
               <div key={member.name} className="text-center group">
                 <div className="w-28 h-28 mx-auto mb-4 rounded-full overflow-hidden ring-4 ring-border group-hover:ring-accent transition-colors">
