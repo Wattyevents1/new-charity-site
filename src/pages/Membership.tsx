@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useCurrency } from "@/hooks/useCurrency";
 
 const tiers = [
   { name: "Supporter", price: 10, icon: Heart, description: "Show your support with a monthly contribution.", features: ["Monthly newsletter", "Name on supporters wall", "Tax-deductible receipt", "Project updates via email"], popular: false },
@@ -21,6 +22,7 @@ const Membership = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
+  const { formatAmount } = useCurrency();
 
   const handleJoin = async () => {
     if (!selectedTier || !email) {
@@ -85,7 +87,7 @@ const Membership = () => {
                   <CardDescription>{tier.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="text-center">
-                  <div className="mb-6"><span className="font-serif text-4xl font-bold text-foreground">&euro;{tier.price}</span><span className="text-muted-foreground text-sm">/month</span></div>
+                  <div className="mb-6"><span className="font-serif text-4xl font-bold text-foreground">{formatAmount(tier.price)}</span><span className="text-muted-foreground text-sm">/month</span></div>
                   <ul className="space-y-3 text-left">
                     {tier.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-2 text-sm"><Check className="w-4 h-4 text-primary shrink-0 mt-0.5" /><span className="text-muted-foreground">{feature}</span></li>
@@ -107,7 +109,7 @@ const Membership = () => {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-serif">Join as {selectedTier?.name}</DialogTitle>
-            <DialogDescription>{"Enter your details to start your \u20AC" + (selectedTier?.price || "") + "/month membership."}</DialogDescription>
+            <DialogDescription>Enter your details to start your {selectedTier ? formatAmount(selectedTier.price) : ""}/month membership.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div><Label htmlFor="member-name">Full Name</Label><Input id="member-name" placeholder="John Doe" className="mt-1" value={name} onChange={(e) => setName(e.target.value)} /></div>
@@ -115,7 +117,7 @@ const Membership = () => {
             <div><Label htmlFor="member-phone">Phone (for mobile money)</Label><Input id="member-phone" type="tel" placeholder="+256700000000" className="mt-1" value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
             <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold" disabled={!email || loading} onClick={handleJoin}>
               {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Heart className="w-4 h-4 mr-2 fill-current" />}
-              {loading ? "Processing..." : "Pay \u20AC" + (selectedTier?.price || "") + "/month via Pesapal"}
+              {loading ? "Processing..." : `Pay ${selectedTier ? formatAmount(selectedTier.price) : ""}/month via Pesapal`}
             </Button>
             <p className="text-xs text-muted-foreground text-center">Secure payment via Pesapal (Card or Mobile Money)</p>
           </div>

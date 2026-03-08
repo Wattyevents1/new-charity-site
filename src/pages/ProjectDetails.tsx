@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useProjectDonations } from "@/hooks/useProjectDonations";
+import { useCurrency } from "@/hooks/useCurrency";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects">;
@@ -16,6 +17,7 @@ const ProjectDetails = () => {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const donationTotals = useProjectDonations();
+  const { formatAmount } = useCurrency();
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -103,7 +105,7 @@ const ProjectDetails = () => {
                 <CardContent className="p-6">
                   <h3 className="font-serif text-xl font-bold mb-4">Support This Project</h3>
                   <div className="space-y-3 mb-6">
-                    <div className="flex justify-between text-sm"><span className="font-semibold">€{raised.toLocaleString()}</span><span className="text-muted-foreground">of €{goal.toLocaleString()}</span></div>
+                    <div className="flex justify-between text-sm"><span className="font-semibold">{formatAmount(raised)}</span><span className="text-muted-foreground">of {formatAmount(goal)}</span></div>
                     <Progress value={percentage} className="h-3" />
                     <div className="flex justify-between text-xs text-muted-foreground"><span>{percentage}% funded</span><span>{donorsCount} donors</span></div>
                   </div>

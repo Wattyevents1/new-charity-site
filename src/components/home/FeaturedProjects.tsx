@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useProjectDonations } from "@/hooks/useProjectDonations";
+import { useCurrency } from "@/hooks/useCurrency";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects">;
@@ -13,6 +14,7 @@ type Project = Tables<"projects">;
 const FeaturedProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const donationTotals = useProjectDonations();
+  const { formatAmount } = useCurrency();
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -80,8 +82,8 @@ const FeaturedProjects = () => {
                   </p>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="font-medium text-foreground">€{raised.toLocaleString()}</span>
-                      <span className="text-muted-foreground">of €{goal.toLocaleString()}</span>
+                      <span className="font-medium text-foreground">{formatAmount(raised)}</span>
+                      <span className="text-muted-foreground">of {formatAmount(goal)}</span>
                     </div>
                     <Progress value={percentage} className="h-2" />
                     <div className="flex justify-between items-center">

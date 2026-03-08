@@ -3,13 +3,14 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, Users, FolderKanban, Mail, FileText, Package } from "lucide-react";
+import { useCurrency } from "@/hooks/useCurrency";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({ donations: 0, totalAmount: 0, projects: 0, volunteers: 0, contacts: 0, blogPosts: 0, itemDonations: 0 });
+  const { formatAmount } = useCurrency();
 
   useEffect(() => {
     const fetchStats = async () => {
-      // Donations & projects still use direct queries (not in scope for edge functions)
       const [donations, projects, adminStats] = await Promise.all([
         supabase.from("donations").select("amount"),
         supabase.from("projects").select("id", { count: "exact", head: true }),
@@ -33,7 +34,7 @@ const AdminDashboard = () => {
   }, []);
 
   const cards = [
-    { label: "Total Donations", value: `€${stats.totalAmount.toLocaleString()}`, sub: `${stats.donations} donations`, icon: Heart, color: "text-accent" },
+    { label: "Total Donations", value: formatAmount(stats.totalAmount), sub: `${stats.donations} donations`, icon: Heart, color: "text-accent" },
     { label: "Projects", value: stats.projects, sub: "Total projects", icon: FolderKanban, color: "text-primary" },
     { label: "Volunteers", value: stats.volunteers, sub: "Applications", icon: Users, color: "text-charity-green-light" },
     { label: "Blog Posts", value: stats.blogPosts, sub: "Published & drafts", icon: FileText, color: "text-charity-gold" },

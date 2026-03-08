@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useProjectDonations } from "@/hooks/useProjectDonations";
+import { useCurrency } from "@/hooks/useCurrency";
 
 const UrgentAppeals = () => {
   const [appeal, setAppeal] = useState<any>(null);
   const donationTotals = useProjectDonations();
+  const { formatAmount } = useCurrency();
 
   useEffect(() => {
     const fetch = async () => {
@@ -55,8 +57,8 @@ const UrgentAppeals = () => {
 
           <div className="max-w-md mx-auto mb-8">
             <div className="flex justify-between text-sm mb-2">
-               <span className="font-semibold">€{raised.toLocaleString()} raised</span>
-               <span className="text-primary-foreground/70">Goal: €{goal.toLocaleString()}</span>
+               <span className="font-semibold">{formatAmount(raised)} raised</span>
+               <span className="text-primary-foreground/70">Goal: {formatAmount(goal)}</span>
             </div>
             <Progress value={percentage} className="h-3 bg-primary-foreground/20" />
             <div className="flex justify-between items-center mt-2">

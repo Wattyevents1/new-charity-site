@@ -4,12 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { useCurrency } from "@/hooks/useCurrency";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Donation = Tables<"donations">;
 
 const AdminDonations = () => {
   const [donations, setDonations] = useState<Donation[]>([]);
+  const { formatAmount } = useCurrency();
 
   useEffect(() => {
     supabase.from("donations").select("*").order("created_at", { ascending: false }).then(({ data }) => setDonations(data || []));
@@ -21,7 +23,7 @@ const AdminDonations = () => {
     <AdminLayout>
       <div className="mb-6">
         <h1 className="font-serif text-3xl font-bold">Donations</h1>
-        <p className="text-muted-foreground mt-1">Total: &euro;{totalAmount.toLocaleString()} from {donations.length} donations</p>
+        <p className="text-muted-foreground mt-1">Total: {formatAmount(totalAmount)} from {donations.length} donations</p>
       </div>
       <Card className="border-border/50">
         <CardContent className="p-0">
@@ -41,7 +43,7 @@ const AdminDonations = () => {
                 <TableRow key={d.id}>
                   <TableCell className="font-medium">{d.donor_name || "Anonymous"}</TableCell>
                   <TableCell>{d.donor_email || "\u2014"}</TableCell>
-                  <TableCell className="font-semibold">&euro;{d.amount.toLocaleString()}</TableCell>
+                  <TableCell className="font-semibold">{formatAmount(d.amount)}</TableCell>
                   <TableCell>{d.payment_method || "\u2014"}</TableCell>
                   <TableCell><Badge variant={d.is_recurring ? "default" : "secondary"}>{d.is_recurring ? "Yes" : "No"}</Badge></TableCell>
                   <TableCell>{new Date(d.created_at).toLocaleDateString()}</TableCell>
