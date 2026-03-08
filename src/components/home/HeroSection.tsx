@@ -35,7 +35,7 @@ const HeroSection = () => {
               </Button>
             </Link>
             <Link to="/projects">
-              <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 px-8 py-6 text-lg rounded-full">
+              <Button size="lg" variant="outline" className="border-[hsl(42,90%,55%)] text-[hsl(42,90%,55%)] hover:bg-[hsl(42,90%,55%)]/10 px-8 py-6 text-lg rounded-full">
                 Our Projects
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
