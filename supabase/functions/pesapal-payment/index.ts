@@ -176,7 +176,16 @@ serve(async (req) => {
           const pesapalStatus = (statusData.payment_status_description || "").toLowerCase();
 
           if (pesapalStatus === "completed") {
-            await updateDonationStatus(orderMerchantReference, "completed");
+            const donation = await updateDonationStatus(orderMerchantReference, "completed");
+            if (donation) {
+              sendNotification("donation", {
+                amount: donation.amount,
+                donor_name: donation.donor_name,
+                donor_email: donation.donor_email,
+                payment_method: "pesapal",
+                is_recurring: donation.is_recurring,
+              });
+            }
           } else if (pesapalStatus === "failed" || pesapalStatus === "invalid") {
             await updateDonationStatus(orderMerchantReference, "failed");
           } else if (pesapalStatus === "reversed") {
