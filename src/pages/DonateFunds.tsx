@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
-const PAYPAL_CLIENT_ID = "AVg184leR4hkSejOrXXrgMxTfsNE_-615TFTRmCrY8uZ073C8YiBM6VzdXRJtZXAYFIi-YcNrHS_tpNb";
+const PAYPAL_CLIENT_ID = "EDWGE4HIQ4XT_x_GVZwL4H_J23ZhZFdNBJ6CPQ2fx72-fXox4AYnrV5b0IUXJSmnXdsNzPmjRRyaoGG5";
 
 const presetAmounts = [10, 25, 50, 100, 250, 500];
 
