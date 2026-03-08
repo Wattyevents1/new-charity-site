@@ -34,7 +34,7 @@ const ProjectDetails = () => {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <p className="text-muted-foreground">Loading project...</p>
+          <LogoSpinner message="Loading project..." />
         </div>
       </Layout>
     );

@@ -50,7 +50,7 @@ const Careers = () => {
         <div className="container mx-auto px-4 max-w-3xl">
           <h2 className="font-serif text-2xl font-bold mb-8">Open Positions</h2>
           {loading ? (
-            <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>
+            <LogoSpinner message="Loading positions..." />
           ) : (
             <div className="space-y-4">
               {jobs.map((job) => (
