@@ -113,6 +113,32 @@ const About = () => {
           </div>
         </div>
       </section>
+
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">Our Team</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Meet the dedicated individuals behind Al-Imran Muslim Aid.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto">
+            {[
+              { name: "Watiti Imran", role: "Chairperson" },
+              { name: "Webisa Twaha", role: "Secretary" },
+              { name: "Khaukha Mariam", role: "Treasurer" },
+            ].map((member) => (
+              <div key={member.name} className="text-center group">
+                <div className="w-28 h-28 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center ring-4 ring-border group-hover:ring-accent transition-colors">
+                  <Users className="w-10 h-10 text-primary/60" />
+                </div>
+                <h3 className="font-semibold text-foreground text-lg">{member.name}</h3>
+                <p className="text-sm text-muted-foreground">{member.role}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </Layout>
   );
 };
