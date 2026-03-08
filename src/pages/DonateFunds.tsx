@@ -73,6 +73,20 @@ const DonateFunds = () => {
         status: "completed",
       });
       if (error) console.error("Failed to record donation:", error);
+
+      // Send admin notification
+      supabase.functions.invoke("send-notification", {
+        body: {
+          type: "donation",
+          data: {
+            amount: Number(amount),
+            donor_name: donorName || "Anonymous",
+            donor_email: donorEmail || "N/A",
+            payment_method: "paypal",
+            is_recurring: donationType === "monthly",
+          },
+        },
+      }).catch((err) => console.error("Notification failed:", err));
     } catch (err) {
       console.error("Failed to record donation:", err);
     }
