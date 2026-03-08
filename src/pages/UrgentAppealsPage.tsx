@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { AlertTriangle, Clock, Heart, MapPin } from "lucide-react";
+import LogoSpinner from "@/components/ui/LogoSpinner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
