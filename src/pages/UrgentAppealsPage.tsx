@@ -51,7 +51,6 @@ const UrgentAppealsPage = () => {
               <p className="text-lg">No urgent appeals at this time. Check back soon.</p>
             </div>
           )}
-          )}
           <div className="space-y-8">
             {appeals.map((appeal) => {
               const goal = appeal.funding_goal || 1;

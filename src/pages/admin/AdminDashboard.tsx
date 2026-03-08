@@ -47,11 +47,15 @@ const AdminDashboard = () => {
 
   return (
     <AdminLayout>
-      <div className="mb-8">
-        <h1 className="font-serif text-3xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Welcome back. Here's an overview of your organization.</p>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {loading ? (
+        <LogoSpinner message="Loading dashboard..." />
+      ) : (
+        <>
+          <div className="mb-8">
+            <h1 className="font-serif text-3xl font-bold text-foreground">Dashboard</h1>
+            <p className="text-muted-foreground mt-1">Welcome back. Here's an overview of your organization.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {cards.map((card) => (
           <Card key={card.label} className="border-border/50">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
