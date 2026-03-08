@@ -87,7 +87,7 @@ const Membership = () => {
                   <CardDescription>{tier.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="text-center">
-                  <div className="mb-6"><span className="font-serif text-4xl font-bold text-foreground">${tier.price}</span><span className="text-muted-foreground text-sm">/month</span></div>
+                  <div className="mb-6"><span className="font-serif text-4xl font-bold text-foreground">€{tier.price}</span><span className="text-muted-foreground text-sm">/month</span></div>
                   <ul className="space-y-3 text-left">
                     {tier.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-2 text-sm"><Check className="w-4 h-4 text-primary shrink-0 mt-0.5" /><span className="text-muted-foreground">{feature}</span></li>
