@@ -12,6 +12,7 @@ import About from "./pages/About";
 import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
 import DonateFunds from "./pages/DonateFunds";
+import DonationCallback from "./pages/DonationCallback";
 import DonateItems from "./pages/DonateItems";
 import Membership from "./pages/Membership";
 import Volunteer from "./pages/Volunteer";
