@@ -10,6 +10,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+const countryCodes = [
+  { code: "+256", country: "🇺🇬 Uganda" },
+  { code: "+254", country: "🇰🇪 Kenya" },
+  { code: "+255", country: "🇹🇿 Tanzania" },
+  { code: "+250", country: "🇷🇼 Rwanda" },
+  { code: "+257", country: "🇧🇮 Burundi" },
+  { code: "+211", country: "🇸🇸 South Sudan" },
+  { code: "+243", country: "🇨🇩 DR Congo" },
+  { code: "+44", country: "🇬🇧 UK" },
+  { code: "+1", country: "🇺🇸 USA" },
+  { code: "+971", country: "🇦🇪 UAE" },
+  { code: "+966", country: "🇸🇦 Saudi Arabia" },
+  { code: "+91", country: "🇮🇳 India" },
+  { code: "+92", country: "🇵🇰 Pakistan" },
+  { code: "+60", country: "🇲🇾 Malaysia" },
+  { code: "+49", country: "🇩🇪 Germany" },
+  { code: "+33", country: "🇫🇷 France" },
+  { code: "+27", country: "🇿🇦 South Africa" },
+  { code: "+234", country: "🇳🇬 Nigeria" },
+  { code: "+233", country: "🇬🇭 Ghana" },
+  { code: "+251", country: "🇪🇹 Ethiopia" },
+];
+
 const benefits = [
   { icon: Heart, title: "Make a Difference", description: "Directly impact lives in communities that need it most." },
   { icon: Users, title: "Join a Community", description: "Connect with like-minded people who share your passion." },
@@ -20,6 +43,7 @@ const benefits = [
 const Volunteer = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [countryCode, setCountryCode] = useState("+256");
   const [phone, setPhone] = useState("");
   const [areaOfInterest, setAreaOfInterest] = useState("");
   const [skills, setSkills] = useState("");
@@ -32,12 +56,12 @@ const Volunteer = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("public-forms", {
-        body: { action: "submit_volunteer", data: { name, email, phone, area_of_interest: areaOfInterest, skills, availability } },
+        body: { action: "submit_volunteer", data: { name, email, phone: phone ? `${countryCode} ${phone}` : "", area_of_interest: areaOfInterest, skills, availability } },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       toast.success("Application submitted! We'll be in touch.");
-      setName(""); setEmail(""); setPhone(""); setAreaOfInterest(""); setSkills(""); setAvailability("");
+      setName(""); setEmail(""); setPhone(""); setCountryCode("+256"); setAreaOfInterest(""); setSkills(""); setAvailability("");
     } catch (err: any) {
       toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
@@ -76,7 +100,19 @@ const Volunteer = () => {
                     <div><Label htmlFor="vol-email">Email</Label><Input id="vol-email" type="email" placeholder="you@example.com" className="mt-1" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><Label htmlFor="vol-phone">Phone</Label><Input id="vol-phone" type="tel" placeholder="+254..." className="mt-1" value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
+                    <div><Label htmlFor="vol-phone">Phone</Label>
+                      <div className="flex gap-2 mt-1">
+                        <Select value={countryCode} onValueChange={setCountryCode}>
+                          <SelectTrigger className="w-[140px] shrink-0"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {countryCodes.map((c) => (
+                              <SelectItem key={c.code} value={c.code}>{c.country} ({c.code})</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Input id="vol-phone" type="tel" placeholder="701 703 951" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                      </div>
+                    </div>
                     <div>
                       <Label>Area of Interest</Label>
                       <Select value={areaOfInterest} onValueChange={setAreaOfInterest}><SelectTrigger className="mt-1"><SelectValue placeholder="Select area" /></SelectTrigger>
