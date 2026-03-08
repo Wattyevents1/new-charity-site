@@ -20,6 +20,23 @@ function err(status: number, message: string) {
   return json({ error: message }, status);
 }
 
+async function sendNotification(type: string, data: Record<string, unknown>) {
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    await fetch(`${supabaseUrl}/functions/v1/send-notification`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${supabaseAnonKey}`,
+      },
+      body: JSON.stringify({ type, data }),
+    });
+  } catch (e) {
+    console.error("Failed to send notification:", e);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -33,22 +50,23 @@ Deno.serve(async (req) => {
     );
 
     switch (action) {
-      // ── Public form submissions ──────────────────────────────
       case "submit_volunteer": {
         const { name, email, phone, area_of_interest, skills, availability } = data || {};
         if (!name || !email) return err(400, "Name and email are required");
         if (!emailRegex.test(email)) return err(400, "Invalid email address");
         if (name.length > 100 || email.length > 255) return err(400, "Input too long");
 
-        const { error } = await supabase.from("volunteers").insert({
+        const insertData = {
           name: sanitize(name).slice(0, 100),
           email: sanitize(email).slice(0, 255),
           phone: phone ? sanitize(phone).slice(0, 20) : null,
           area_of_interest: area_of_interest ? sanitize(area_of_interest).slice(0, 100) : null,
           skills: skills ? sanitize(skills).slice(0, 500) : null,
           availability: availability ? sanitize(availability).slice(0, 50) : null,
-        });
+        };
+        const { error } = await supabase.from("volunteers").insert(insertData);
         if (error) throw error;
+        sendNotification("volunteer", insertData);
         return json({ success: true });
       }
 
@@ -57,13 +75,15 @@ Deno.serve(async (req) => {
         if (!name || !email || !message) return err(400, "Name, email, and message are required");
         if (!emailRegex.test(email)) return err(400, "Invalid email address");
 
-        const { error } = await supabase.from("contact_submissions").insert({
+        const insertData = {
           name: sanitize(name).slice(0, 100),
           email: sanitize(email).slice(0, 255),
           subject: subject ? sanitize(subject).slice(0, 200) : null,
           message: sanitize(message).slice(0, 2000),
-        });
+        };
+        const { error } = await supabase.from("contact_submissions").insert(insertData);
         if (error) throw error;
+        sendNotification("contact", insertData);
         return json({ success: true });
       }
 
@@ -72,15 +92,17 @@ Deno.serve(async (req) => {
         if (!donor_name || !donor_email || !item_description) return err(400, "Name, email, and description are required");
         if (!emailRegex.test(donor_email)) return err(400, "Invalid email address");
 
-        const { error } = await supabase.from("item_donations").insert({
+        const insertData = {
           donor_name: sanitize(donor_name).slice(0, 100),
           donor_email: sanitize(donor_email).slice(0, 255),
           donor_phone: donor_phone ? sanitize(donor_phone).slice(0, 20) : null,
           category: category ? sanitize(category).slice(0, 50) : null,
           item_description: sanitize(item_description).slice(0, 1000),
           pickup_location: pickup_location ? sanitize(pickup_location).slice(0, 300) : null,
-        });
+        };
+        const { error } = await supabase.from("item_donations").insert(insertData);
         if (error) throw error;
+        sendNotification("item_donation", insertData);
         return json({ success: true });
       }
 
@@ -91,17 +113,18 @@ Deno.serve(async (req) => {
         const validTiers = ["supporter", "partner", "champion"];
         if (!validTiers.includes(tier)) return err(400, "Invalid membership tier");
 
-        const { error } = await supabase.from("memberships").insert({
+        const insertData = {
           donor_email: sanitize(donor_email).slice(0, 255),
           donor_name: donor_name ? sanitize(donor_name).slice(0, 100) : null,
           tier,
           status: "pending",
-        });
+        };
+        const { error } = await supabase.from("memberships").insert(insertData);
         if (error) throw error;
+        sendNotification("membership", insertData);
         return json({ success: true });
       }
 
-      // ── Public read endpoints ────────────────────────────────
       case "list_published_posts": {
         const { data: posts, error } = await supabase
           .from("blog_posts")
