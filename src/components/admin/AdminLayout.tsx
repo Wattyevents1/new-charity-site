@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useVolunteerNotifications } from "@/hooks/useVolunteerNotifications";
 import { LayoutDashboard, FolderKanban, Heart, Users, FileText, Mail, Briefcase, AlertTriangle, Package, Crown, LogOut, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.jpg";
