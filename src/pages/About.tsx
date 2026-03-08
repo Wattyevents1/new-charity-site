@@ -87,9 +87,6 @@ const About = () => {
                     <li>560,000 population</li>
                     <li>Official language: English (several other languages also spoken)</li>
                   </ul>
-                  <p className="text-xs mt-3 text-muted-foreground/70">
-                    Al-Imran Muslim Aid is a project of SERVING HUMANITY Uganda — Registered Charity Number: STK5026/2021
-                  </p>
                 </div>
               </CardContent>
             </Card>
