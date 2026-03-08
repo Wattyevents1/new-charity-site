@@ -1,5 +1,8 @@
 import Layout from "@/components/layout/Layout";
 import { Target, Eye, MapPin, Users, Heart, Briefcase } from "lucide-react";
+import teamImran from "@/assets/team-imran.jpg";
+import teamTwaha from "@/assets/team-twaha.jpg";
+import teamMariam from "@/assets/team-mariam.jpg";
 import { Card, CardContent } from "@/components/ui/card";
 
 const About = () => {
