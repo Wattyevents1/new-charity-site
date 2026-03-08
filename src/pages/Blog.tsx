@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
-import { Search, Calendar, User, ArrowRight } from "lucide-react";
+import { Search, Calendar, User, ArrowRight, Share2 } from "lucide-react";
+import SocialShareButtons from "@/components/ui/SocialShareButtons";
 import LogoSpinner from "@/components/ui/LogoSpinner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
