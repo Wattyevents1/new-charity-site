@@ -9,10 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { countryCodes, toFlag, DEFAULT_COUNTRY_VALUE, getDialCode } from "@/lib/countryCodes";
 
 const DonateItems = () => {
   const [donorName, setDonorName] = useState("");
   const [donorEmail, setDonorEmail] = useState("");
+  const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_VALUE);
   const [donorPhone, setDonorPhone] = useState("");
   const [category, setCategory] = useState("");
   const [itemDescription, setItemDescription] = useState("");
@@ -27,13 +29,13 @@ const DonateItems = () => {
       const { data, error } = await supabase.functions.invoke("public-forms", {
         body: {
           action: "submit_item_donation",
-          data: { donor_name: donorName, donor_email: donorEmail, donor_phone: donorPhone, category, item_description: itemDescription, pickup_location: pickupLocation },
+          data: { donor_name: donorName, donor_email: donorEmail, donor_phone: donorPhone ? `${getDialCode(countryCode)} ${donorPhone}` : "", category, item_description: itemDescription, pickup_location: pickupLocation },
         },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       toast.success("Donation offer submitted! We'll contact you soon.");
-      setDonorName(""); setDonorEmail(""); setDonorPhone(""); setCategory(""); setItemDescription(""); setPickupLocation("");
+      setDonorName(""); setDonorEmail(""); setCountryCode(DEFAULT_COUNTRY_VALUE); setDonorPhone(""); setCategory(""); setItemDescription(""); setPickupLocation("");
     } catch (err: any) {
       toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
@@ -61,7 +63,22 @@ const DonateItems = () => {
                   <div><Label htmlFor="item-name">Your Name</Label><Input id="item-name" placeholder="Your name" className="mt-1" value={donorName} onChange={(e) => setDonorName(e.target.value)} /></div>
                   <div><Label htmlFor="item-email">Email</Label><Input id="item-email" type="email" placeholder="you@example.com" className="mt-1" value={donorEmail} onChange={(e) => setDonorEmail(e.target.value)} /></div>
                 </div>
-                <div><Label htmlFor="item-phone">Phone Number</Label><Input id="item-phone" type="tel" placeholder="+254..." className="mt-1" value={donorPhone} onChange={(e) => setDonorPhone(e.target.value)} /></div>
+                <div>
+                  <Label htmlFor="item-phone">Phone Number</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Select value={countryCode} onValueChange={setCountryCode}>
+                      <SelectTrigger className="w-[120px] shrink-0"><SelectValue /></SelectTrigger>
+                      <SelectContent className="max-h-60">
+                        {countryCodes.map((c, i) => (
+                          <SelectItem key={`${c.cc}-${i}`} value={`${c.cc}|${c.code}`}>
+                            {toFlag(c.cc)} {c.code}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input id="item-phone" type="tel" placeholder="701 703 951" value={donorPhone} onChange={(e) => setDonorPhone(e.target.value)} />
+                  </div>
+                </div>
                 <div>
                   <Label>Category</Label>
                   <Select value={category} onValueChange={setCategory}><SelectTrigger className="mt-1"><SelectValue placeholder="What are you donating?" /></SelectTrigger>
