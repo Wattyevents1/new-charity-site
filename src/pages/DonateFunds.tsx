@@ -171,20 +171,15 @@ const DonateFunds = () => {
                                 if (order) {
                                   const txId = order.purchase_units?.[0]?.payments?.captures?.[0]?.id || order.id;
                                   await recordPayPalDonation(txId || "paypal");
-                                  toast.success("Thank you for your generous donation! 🤲");
-                                  setAmount("");
-                                  setSelectedPreset(null);
-                                  setDonorName("");
-                                  setDonorEmail("");
-                                  setDonorPhone("");
+                                  navigate(`/donation/callback?gateway=paypal&status=success&transaction_id=${encodeURIComponent(txId || "")}`);
                                 }
                               }}
                               onError={(err) => {
                                 console.error("PayPal error:", err);
-                                toast.error("PayPal payment failed. Please try again.");
+                                navigate("/donation/callback?gateway=paypal&status=failed");
                               }}
                               onCancel={() => {
-                                toast.info("Payment cancelled.");
+                                navigate("/donation/callback?gateway=paypal&status=cancelled");
                               }}
                             />
                             <p className="text-xs text-muted-foreground text-center mt-3">🔒 Secured by PayPal</p>
