@@ -80,12 +80,15 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
-            <Link to="/donate" onClick={() => setIsOpen(false)} className="mt-2">
-              <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold">
-                <Heart className="w-4 h-4 mr-1" />
-                Donate Now
-              </Button>
-            </Link>
+            <div className="flex items-center gap-3 mt-2">
+              <CurrencySelector />
+              <Link to="/donate" onClick={() => setIsOpen(false)} className="flex-1">
+                <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold">
+                  <Heart className="w-4 h-4 mr-1" />
+                  Donate Now
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       )}
