@@ -47,6 +47,7 @@ const AdminItemDonations = () => {
               <TableRow>
                 <TableHead>Donor</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Location</TableHead>
