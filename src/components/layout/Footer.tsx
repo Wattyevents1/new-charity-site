@@ -15,7 +15,7 @@ const Footer = () => {
             <p className="text-primary-foreground/80 text-sm leading-relaxed">
               Making a difference together. We empower communities through sustainable development, education, and compassionate action for the Ummah.
             </p>
-            <p className="text-primary-foreground/80 text-sm leading-relaxed">
+            <p className="text-primary-foreground/60 text-xs italic leading-relaxed">
               AIMA is a registered charity registered in Uganda and East Africa. Registered Charity Number: STK5026/2021.
             </p>
             <div className="flex gap-3 flex-wrap">
