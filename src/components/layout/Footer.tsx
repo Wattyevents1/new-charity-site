@@ -18,7 +18,7 @@ const Footer = () => {
             <p className="text-primary-foreground/60 text-xs italic leading-relaxed">
               AIMA is a registered charity registered in Uganda and East Africa. Registered Charity Number: STK5026/2021.
             </p>
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex gap-3 flex-wrap md:flex-nowrap">
               {[
                 { href: "https://www.facebook.com/alimranmuslimaid1/", icon: <Facebook className="w-4 h-4" />, label: "Facebook" },
                 { href: "https://x.com/alimranmuslimaid", icon: <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>, label: "X" },
