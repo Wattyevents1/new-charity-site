@@ -21,7 +21,7 @@ const benefits = [
 const Volunteer = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [countryCode, setCountryCode] = useState(defaultValue);
+  const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_VALUE);
   const [phone, setPhone] = useState("");
   const [areaOfInterest, setAreaOfInterest] = useState("");
   const [skills, setSkills] = useState("");
