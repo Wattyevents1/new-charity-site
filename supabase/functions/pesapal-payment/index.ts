@@ -171,7 +171,7 @@ serve(async (req) => {
         try {
           const token = await getAccessToken();
           const statusData = await getTransactionStatus(token, orderTrackingId);
-          console.log("Transaction status from IPN:", statusData);
+          console.log("Transaction status from IPN:", statusData.payment_status_description);
 
           const pesapalStatus = (statusData.payment_status_description || "").toLowerCase();
 
