@@ -1,100 +1,55 @@
 
 
-# 🌍 Charity & Non-Profit Platform
+# Security Scan Results and Fix Plan
 
-A comprehensive, warm-toned charity website built with React, Tailwind CSS, and Supabase for backend services. Admin-only login with guest donations.
+The new scan found **17 findings** across 3 scanners. Here is the breakdown and proposed fixes.
 
----
+## Current Findings
 
-## 🎨 Design & Theme
-- **Warm & compassionate palette**: Earthy greens, soft oranges, warm whites, and gentle gradients
-- **Typography**: Clean, readable serif headings with sans-serif body text
-- **Fully responsive** across desktop, tablet, and mobile
-- **WCAG-accessible** with proper contrast, focus states, and alt text
-- **Floating "Donate Now" button** visible on all pages
+### Errors (2) — Must Fix
+1. **Donations table: default status is 'completed' but RLS requires 'pending'** — The `donations.status` column defaults to `'completed'`, so an insert without specifying status bypasses the RLS `WITH CHECK (status = 'pending')` policy. Fix: change the column default to `'pending'`.
+2. **Memberships table: default status is 'active' but RLS requires 'pending'** — Same issue. The `memberships.status` column defaults to `'active'`. Fix: change the column default to `'pending'`.
 
----
+### Warnings (15) — Assess and Address
+3. **RLS Policy Always True** — The `contact_submissions` INSERT policy uses `WITH CHECK (true)`. This is intentional (anyone can submit a contact form), but we can scope it to only allow `is_read = false` to prevent abuse.
+4. **Anonymous Access Policies (11 tables)** — These are flagged because policies apply to `{public}` role which includes anonymous users. Since anonymous sign-ins are disabled, these are informational. The admin-only policies (`is_admin()`, `is_admin_or_manager()`) already gate access properly. These can be marked as acceptable.
+5. **Leaked Password Protection Disabled** — Enable via auth settings.
+6. **Privilege escalation via user_roles** — The `is_admin()` function is `SECURITY DEFINER`, so the INSERT policy on `user_roles` is safe. Only existing admins can insert. Mark as acceptable.
+7. **No INSERT policy on profiles** — Profile creation is handled via a database trigger on `auth.users`. This is intentional. Mark as acceptable.
 
-## 📄 Pages
+## Planned Changes
 
-### Public Pages
-1. **Home** — Hero with CTA, featured projects with animated progress bars, impact stats counter, urgent appeals banner, testimonials
-2. **About Us** — Mission, vision, team members, history timeline
-3. **Projects / Campaigns** — Filterable grid of project cards with images, funding progress, and donate buttons
-4. **Project Details** — Full project info, gallery, impact stats, funding goal progress, inline donation form
-5. **Donate Funds** — One-time and recurring donation form with amount presets, Stripe checkout integration
-6. **Donate Items/Food** — Form to submit in-kind donation offers (name, item description, location, photos)
-7. **Membership & Subscriptions** — Tiered membership plans (e.g., Supporter, Partner, Champion) with Stripe recurring billing
-8. **Volunteer Registration** — Form to sign up as a volunteer (skills, availability, area of interest)
-9. **Blog / News** — List of published articles with categories, search, and individual article pages
-10. **Urgent Appeals** — Highlighted time-sensitive campaigns with prominent CTAs
-11. **Contact Us** — Contact form, map embed, social links, office details
-12. **Careers** — Job listings with apply forms
-13. **Privacy Policy** — Static legal page
-14. **Terms of Use** — Static legal page
+### Migration SQL
+- Change `donations.status` default from `'completed'` to `'pending'`
+- Change `memberships.status` default from `'active'` to `'pending'`
+- Update `contact_submissions` INSERT policy to restrict `is_read = false`
 
----
+### Auth Settings
+- Enable leaked password protection (HIBP check)
 
-## 💳 Payments
-- **Stripe** — Primary payment processor for card payments, Apple Pay, Google Pay
-- **PayPal** — Embedded PayPal button as alternative checkout option
-- **Pesapal (Mobile Money)** — Integration via edge function for Africa-friendly mobile payments
-- Support for **one-time** and **recurring** donations
-- Donation receipts generated and emailed
+### Security Findings Management
+- Mark anonymous access warnings as acceptable (anonymous sign-ins are disabled)
+- Mark privilege escalation and profiles INSERT warnings as acceptable
+- Delete resolved error findings after fixes
 
----
+## Technical Details
 
-## 🔐 Authentication & Admin
-- **Admin-only login** using Supabase Auth (email/password)
-- **Role-based access** (Super Admin, Content Manager) stored in a separate `user_roles` table
-- Guest donors do NOT need accounts
+```sql
+-- Fix donations default status
+ALTER TABLE public.donations 
+  ALTER COLUMN status SET DEFAULT 'pending';
 
----
+-- Fix memberships default status  
+ALTER TABLE public.memberships 
+  ALTER COLUMN status SET DEFAULT 'pending';
 
-## 🛠️ Admin Dashboard
-- **Projects Management** — Create, edit, delete projects and campaigns; set funding goals
-- **Donations Overview** — View all donations, filter by date/project/amount, export data
-- **Volunteer Management** — Review and approve volunteer applications
-- **Blog CMS** — Create, edit, publish/unpublish blog posts with rich text
-- **Careers Management** — Post and manage job listings
-- **Urgent Appeals** — Create and manage time-sensitive campaigns
-- **Analytics** — Dashboard with donation totals, donor counts, project progress charts (using Recharts)
-- **In-Kind Donations** — Review submitted item/food donation offers
-- **Membership Management** — View active members and subscription status
+-- Tighten contact_submissions INSERT policy
+DROP POLICY IF EXISTS "Anyone can submit contact" ON public.contact_submissions;
+CREATE POLICY "Public can submit contact"
+  ON public.contact_submissions FOR INSERT
+  TO public
+  WITH CHECK (is_read = false);
+```
 
----
-
-## 🗄️ Database (Supabase)
-- **Projects** — title, description, images, funding goal, amount raised, status, category
-- **Donations** — amount, donor name/email, project, payment method, recurring flag, transaction ID
-- **Volunteers** — name, email, phone, skills, availability, status (pending/approved)
-- **Blog Posts** — title, content, author, published date, category, status
-- **Memberships** — tier, donor email, Stripe subscription ID, status
-- **Item Donations** — donor info, item description, photos (stored in Supabase Storage), status
-- **Careers** — title, description, requirements, status
-- **User Roles** — user_id, role (admin, content_manager)
-- **Contact Submissions** — name, email, message, date
-
----
-
-## 📧 Notifications
-- Email confirmations for donations (via Resend + edge function)
-- Volunteer application confirmation emails
-- Admin notifications for new donations and volunteer signups
-
----
-
-## 🌐 Social & Sharing
-- Social media links in footer and contact page
-- Share buttons on project and blog pages
-- Open Graph meta tags for rich social previews
-
----
-
-## 📱 Key UX Features
-- Animated fundraising progress bars on project cards
-- Impact statistics counters (donors, funds raised, lives impacted)
-- Smooth scroll animations and page transitions
-- Mobile-first navigation with hamburger menu
-- Search and filter on projects and blog pages
+The Pesapal edge function inserts donations with explicit `status: 'pending'`, so the default change is safe. The membership page will need verification that it also sends `status: 'pending'` explicitly.
 
