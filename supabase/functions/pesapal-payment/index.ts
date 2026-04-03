@@ -165,13 +165,13 @@ serve(async (req) => {
     if (action === "ipn") {
       const orderTrackingId = url.searchParams.get("OrderTrackingId");
       const orderMerchantReference = url.searchParams.get("OrderMerchantReference");
-      console.log("IPN received:", { orderTrackingId, orderMerchantReference });
+      console.log("IPN received for order:", orderMerchantReference?.substring(0, 8) + "...");
 
       if (orderTrackingId && orderMerchantReference) {
         try {
           const token = await getAccessToken();
           const statusData = await getTransactionStatus(token, orderTrackingId);
-          console.log("Transaction status from IPN:", statusData);
+          console.log("Transaction status from IPN:", statusData.payment_status_description);
 
           const pesapalStatus = (statusData.payment_status_description || "").toLowerCase();
 
@@ -219,7 +219,7 @@ serve(async (req) => {
 
         const token = await getAccessToken();
         const statusData = await getTransactionStatus(token, order_tracking_id);
-        console.log("Status check result:", statusData);
+        console.log("Status check result:", statusData.payment_status_description);
 
         const pesapalStatus = (statusData.payment_status_description || "").toLowerCase();
         let mappedStatus = "pending";
