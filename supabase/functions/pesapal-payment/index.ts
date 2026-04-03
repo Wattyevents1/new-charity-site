@@ -219,7 +219,7 @@ serve(async (req) => {
 
         const token = await getAccessToken();
         const statusData = await getTransactionStatus(token, order_tracking_id);
-        console.log("Status check result:", statusData);
+        console.log("Status check result:", statusData.payment_status_description);
 
         const pesapalStatus = (statusData.payment_status_description || "").toLowerCase();
         let mappedStatus = "pending";
