@@ -165,7 +165,7 @@ serve(async (req) => {
     if (action === "ipn") {
       const orderTrackingId = url.searchParams.get("OrderTrackingId");
       const orderMerchantReference = url.searchParams.get("OrderMerchantReference");
-      console.log("IPN received:", { orderTrackingId, orderMerchantReference });
+      console.log("IPN received for order:", orderMerchantReference?.substring(0, 8) + "...");
 
       if (orderTrackingId && orderMerchantReference) {
         try {
