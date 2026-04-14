@@ -9,9 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-
-const PAYPAL_CLIENT_ID = "Aa5hhWpyD7epL8hLGgBdrXDXAdz23pieiKj6lVRzQNzbw7sqzAcWA0_XzV2jE156k1mG6M_0hhf-uEOo";
 
 const presetAmounts = [10, 25, 50, 100, 250, 500];
 
@@ -61,34 +58,35 @@ const DonateFunds = () => {
     }
   };
 
-  const recordPayPalDonation = async (transactionId: string) => {
+  const handlePayPalPayment = async () => {
+    if (!amount || !donorEmail) {
+      toast.error("Please enter an amount and email address.");
+      return;
+    }
+    setLoading(true);
     try {
-      const { error } = await supabase.from("donations").insert({
-        amount: Number(amount),
-        donor_name: donorName || null,
-        donor_email: donorEmail || null,
-        payment_method: "paypal",
-        transaction_id: transactionId,
-        is_recurring: donationType === "monthly",
-        status: "completed",
-      });
-      if (error) console.error("Failed to record donation:", error);
-
-      // Send admin notification
-      supabase.functions.invoke("send-notification", {
+      // Step 1: Create order on the server
+      const { data: createData, error: createError } = await supabase.functions.invoke("paypal-payment", {
         body: {
-          type: "donation",
-          data: {
-            amount: Number(amount),
-            donor_name: donorName || "Anonymous",
-            donor_email: donorEmail || "N/A",
-            payment_method: "paypal",
-            is_recurring: donationType === "monthly",
-          },
+          action: "create-order",
+          amount,
+          donor_name: donorName,
+          donor_email: donorEmail,
+          donor_phone: donorPhone,
+          description: `${donationType === "monthly" ? "Monthly" : "One-time"} Donation to Al-Imran Muslim Aid`,
+          is_recurring: donationType === "monthly",
+          callback_url: window.location.origin,
         },
-      }).catch((err) => console.error("Notification failed:", err));
-    } catch (err) {
-      console.error("Failed to record donation:", err);
+      });
+      if (createError) throw createError;
+      if (!createData?.redirect_url) throw new Error("Failed to create PayPal order");
+
+      window.location.href = createData.redirect_url;
+    } catch (err: any) {
+      console.error("PayPal payment error:", err);
+      toast.error(err.message || "Payment failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -159,62 +157,22 @@ const DonateFunds = () => {
                       </div>
                       <p className="text-sm">Pay securely with Visa, Mastercard, MTN Mobile Money, or Airtel Money via Pesapal.</p>
                     </TabsContent>
-                    <TabsContent value="paypal" className="mt-4">
-                      {amount ? (
-                        <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, currency: "USD", intent: "capture" }}>
-                          <div className="py-4">
-                            <p className="text-sm text-muted-foreground text-center mb-4">
-                              Complete your <span className="font-semibold text-foreground">${amount}</span> donation securely with PayPal
-                            </p>
-                            <PayPalButtons
-                              style={{ layout: "vertical", shape: "rect", label: "donate" }}
-                              createOrder={(_data, actions) => {
-                                return actions.order.create({
-                                  intent: "CAPTURE",
-                                  purchase_units: [{
-                                    amount: {
-                                      value: String(amount),
-                                      currency_code: "USD",
-                                    },
-                                    description: `${donationType === "monthly" ? "Monthly" : "One-time"} Donation to Al-Imran Muslim Aid`,
-                                  }],
-                                });
-                              }}
-                              onApprove={async (_data, actions) => {
-                                const order = await actions.order?.capture();
-                                if (order) {
-                                  const txId = order.purchase_units?.[0]?.payments?.captures?.[0]?.id || order.id;
-                                  await recordPayPalDonation(txId || "paypal");
-                                  navigate(`/donation/callback?gateway=paypal&status=success&transaction_id=${encodeURIComponent(txId || "")}`);
-                                }
-                              }}
-                              onError={(err) => {
-                                console.error("PayPal error:", err);
-                                navigate("/donation/callback?gateway=paypal&status=failed");
-                              }}
-                              onCancel={() => {
-                                navigate("/donation/callback?gateway=paypal&status=cancelled");
-                              }}
-                            />
-                            <p className="text-xs text-muted-foreground text-center mt-3">🔒 Secured by PayPal</p>
-                          </div>
-                        </PayPalScriptProvider>
-                      ) : (
-                        <div className="py-6 text-center text-muted-foreground">
-                          <Globe className="w-8 h-8 mx-auto mb-2 text-primary/60" />
-                          <p className="text-sm">Please select or enter a donation amount above to see PayPal options.</p>
-                        </div>
-                      )}
+                    <TabsContent value="paypal" className="mt-4 text-center text-muted-foreground py-6">
+                      <Globe className="w-8 h-8 mx-auto mb-2 text-primary/60" />
+                      <p className="text-sm">You'll be redirected to PayPal to complete your donation securely.</p>
                     </TabsContent>
                   </Tabs>
                 </div>
 
-                {activeTab === "pesapal" && (
-                  <Button size="lg" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-6 text-lg rounded-xl" disabled={!amount || loading} onClick={handlePesapalPayment}>
-                    {loading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Heart className="w-5 h-5 mr-2 fill-current" />}
-                    {loading ? "Processing..." : `Donate ${amount ? `$${amount}` : ""} ${donationType === "monthly" ? "Monthly" : ""}`}
-                  </Button>
-                )}
+                <Button
+                  size="lg"
+                  className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-6 text-lg rounded-xl"
+                  disabled={!amount || loading}
+                  onClick={activeTab === "pesapal" ? handlePesapalPayment : handlePayPalPayment}
+                >
+                  {loading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Heart className="w-5 h-5 mr-2 fill-current" />}
+                  {loading ? "Processing..." : `Donate ${amount ? `$${amount}` : ""} ${donationType === "monthly" ? "Monthly" : ""}`}
+                </Button>
                 <p className="text-center text-xs text-muted-foreground mt-4">Your donation is secure and encrypted. You'll receive a receipt via email.</p>
               </CardContent>
             </Card>

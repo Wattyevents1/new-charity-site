@@ -63,7 +63,12 @@ const DonationCallback = () => {
     if (merchantRef) setTransactionId(merchantRef);
 
     if (gateway === "paypal") {
-      // PayPal redirects with explicit status
+      const paypalToken = searchParams.get("token");
+      if (paypalToken) {
+        // User returned from PayPal — capture payment server-side
+        capturePayPalOrder(paypalToken);
+        return;
+      }
       if (result === "success") setStatus("success");
       else if (result === "cancelled") setStatus("cancelled");
       else setStatus("failed");
@@ -83,6 +88,24 @@ const DonationCallback = () => {
     }
   }, [searchParams]);
 
+  const capturePayPalOrder = async (orderId: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("paypal-payment", {
+        body: { action: "capture-order", order_id: orderId },
+      });
+      if (error) throw error;
+      if (data?.status === "completed") {
+        setStatus("success");
+        if (data.transaction_id) setTransactionId(data.transaction_id);
+      } else {
+        setStatus("failed");
+      }
+    } catch (err) {
+      console.error("PayPal capture error:", err);
+      setStatus("failed");
+    }
+  };
+
   const checkPesapalStatus = async (orderTrackingId: string, merchantRef: string | null) => {
     try {
       const { data, error } = await supabase.functions.invoke("pesapal-payment", {
@@ -101,7 +124,6 @@ const DonationCallback = () => {
       }
     } catch (err) {
       console.error("Error checking payment status:", err);
-      // If we can't check, show pending
       setStatus("pending");
     }
   };
