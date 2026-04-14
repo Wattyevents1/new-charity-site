@@ -75,14 +75,13 @@ const DonateFunds = () => {
           donor_phone: donorPhone,
           description: `${donationType === "monthly" ? "Monthly" : "One-time"} Donation to Al-Imran Muslim Aid`,
           is_recurring: donationType === "monthly",
+          callback_url: window.location.origin,
         },
       });
       if (createError) throw createError;
-      if (!createData?.order_id) throw new Error("Failed to create PayPal order");
+      if (!createData?.redirect_url) throw new Error("Failed to create PayPal order");
 
-      // Step 2: Redirect user to PayPal for approval
-      const approvalUrl = `https://www.paypal.com/checkoutnow?token=${encodeURIComponent(createData.order_id)}`;
-      window.location.href = approvalUrl;
+      window.location.href = createData.redirect_url;
     } catch (err: any) {
       console.error("PayPal payment error:", err);
       toast.error(err.message || "Payment failed. Please try again.");
