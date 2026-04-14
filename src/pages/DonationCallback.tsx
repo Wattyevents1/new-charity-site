@@ -63,7 +63,12 @@ const DonationCallback = () => {
     if (merchantRef) setTransactionId(merchantRef);
 
     if (gateway === "paypal") {
-      // PayPal redirects with explicit status
+      const paypalToken = searchParams.get("token");
+      if (paypalToken) {
+        // User returned from PayPal — capture payment server-side
+        capturePayPalOrder(paypalToken);
+        return;
+      }
       if (result === "success") setStatus("success");
       else if (result === "cancelled") setStatus("cancelled");
       else setStatus("failed");
