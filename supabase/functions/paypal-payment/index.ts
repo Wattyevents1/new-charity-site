@@ -155,7 +155,7 @@ serve(async (req) => {
       });
 
       return new Response(
-        JSON.stringify({ order_id: orderData.id }),
+        JSON.stringify({ order_id: orderData.id, redirect_url: redirectUrl }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
