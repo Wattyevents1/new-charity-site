@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { validateDonationForm, sanitize, MAX_LENGTHS, isValidEmail, type ValidationError } from "@/lib/validation";
 
 const presetAmounts = [10, 25, 50, 100, 250, 500];
 
@@ -22,23 +23,32 @@ const DonateFunds = () => {
   const [donorPhone, setDonorPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("pesapal");
+  const [errors, setErrors] = useState<ValidationError>({});
 
   const handlePresetClick = (preset: number) => { setSelectedPreset(preset); setAmount(preset); };
   const handleCustomAmount = (value: string) => { setSelectedPreset(null); setAmount(value ? parseInt(value) : ""); };
 
-  const handlePesapalPayment = async () => {
-    if (!amount || !donorEmail) {
-      toast.error("Please enter an amount and email address.");
-      return;
+  const validateForm = (): boolean => {
+    const validationErrors = validateDonationForm({ donor_email: donorEmail, amount });
+    if (donorEmail && !isValidEmail(donorEmail)) validationErrors.donor_email = "Please enter a valid email address";
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      toast.error("Please fix the errors below.");
+      return false;
     }
+    return true;
+  };
+
+  const handlePesapalPayment = async () => {
+    if (!validateForm()) return;
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("pesapal-payment", {
         body: {
           amount,
-          donor_name: donorName,
-          donor_email: donorEmail,
-          donor_phone: donorPhone,
+          donor_name: sanitize(donorName, MAX_LENGTHS.name),
+          donor_email: sanitize(donorEmail, MAX_LENGTHS.email),
+          donor_phone: sanitize(donorPhone, MAX_LENGTHS.phone),
           description: `${donationType === "monthly" ? "Monthly" : "One-time"} Donation`,
           is_recurring: donationType === "monthly",
           callback_url: window.location.origin,
@@ -59,20 +69,16 @@ const DonateFunds = () => {
   };
 
   const handlePayPalPayment = async () => {
-    if (!amount || !donorEmail) {
-      toast.error("Please enter an amount and email address.");
-      return;
-    }
+    if (!validateForm()) return;
     setLoading(true);
     try {
-      // Step 1: Create order on the server
       const { data: createData, error: createError } = await supabase.functions.invoke("paypal-payment", {
         body: {
           action: "create-order",
           amount,
-          donor_name: donorName,
-          donor_email: donorEmail,
-          donor_phone: donorPhone,
+          donor_name: sanitize(donorName, MAX_LENGTHS.name),
+          donor_email: sanitize(donorEmail, MAX_LENGTHS.email),
+          donor_phone: sanitize(donorPhone, MAX_LENGTHS.phone),
           description: `${donationType === "monthly" ? "Monthly" : "One-time"} Donation to Al-Imran Muslim Aid`,
           is_recurring: donationType === "monthly",
           callback_url: window.location.origin,
@@ -127,19 +133,27 @@ const DonateFunds = () => {
                   <Label htmlFor="custom-amount" className="text-sm font-medium mb-2 block">Or enter a custom amount</Label>
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
-                    <Input id="custom-amount" type="number" placeholder="0.00" value={amount} onChange={(e) => handleCustomAmount(e.target.value)} className="pl-8 text-lg h-12" min="1" />
+                    <Input id="custom-amount" type="number" placeholder="0.00" value={amount} onChange={(e) => handleCustomAmount(e.target.value)} className="pl-8 text-lg h-12" min="1" max="1000000" />
                   </div>
+                  {errors.amount && <p className="text-xs text-destructive mt-1">{errors.amount}</p>}
                 </div>
 
                 <div className="space-y-4 mb-8">
                   <h3 className="font-serif text-lg font-semibold">Your Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><Label htmlFor="donor-name">Full Name</Label><Input id="donor-name" placeholder="John Doe" className="mt-1" value={donorName} onChange={(e) => setDonorName(e.target.value)} /></div>
-                    <div><Label htmlFor="donor-email">Email</Label><Input id="donor-email" type="email" placeholder="john@example.com" className="mt-1" value={donorEmail} onChange={(e) => setDonorEmail(e.target.value)} /></div>
+                    <div>
+                      <Label htmlFor="donor-name">Full Name</Label>
+                      <Input id="donor-name" placeholder="John Doe" className="mt-1" value={donorName} onChange={(e) => setDonorName(e.target.value)} maxLength={MAX_LENGTHS.name} />
+                    </div>
+                    <div>
+                      <Label htmlFor="donor-email">Email</Label>
+                      <Input id="donor-email" type="email" placeholder="john@example.com" className="mt-1" value={donorEmail} onChange={(e) => setDonorEmail(e.target.value)} maxLength={MAX_LENGTHS.email} />
+                      {errors.donor_email && <p className="text-xs text-destructive mt-1">{errors.donor_email}</p>}
+                    </div>
                   </div>
                   <div>
                     <Label htmlFor="donor-phone">Phone (for mobile money)</Label>
-                    <Input id="donor-phone" type="tel" placeholder="+256700000000" className="mt-1" value={donorPhone} onChange={(e) => setDonorPhone(e.target.value)} />
+                    <Input id="donor-phone" type="tel" placeholder="+256700000000" className="mt-1" value={donorPhone} onChange={(e) => setDonorPhone(e.target.value)} maxLength={MAX_LENGTHS.phone} />
                   </div>
                 </div>
 
