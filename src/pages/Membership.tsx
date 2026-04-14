@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useCurrency } from "@/hooks/useCurrency";
+import { validateMembershipForm, sanitize, MAX_LENGTHS, type ValidationError } from "@/lib/validation";
 
 const tiers = [
   { name: "Supporter", price: 10, icon: Heart, description: "Show your support with a monthly contribution.", features: ["Monthly newsletter", "Name on supporters wall", "Tax-deductible receipt", "Project updates via email"], popular: false },
@@ -23,10 +24,13 @@ const Membership = () => {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const { formatAmount } = useCurrency();
+  const [errors, setErrors] = useState<ValidationError>({});
 
   const handleJoin = async () => {
-    if (!selectedTier || !email) {
-      toast.error("Please enter your email address.");
+    const validationErrors = validateMembershipForm({ email });
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0 || !selectedTier) {
+      toast.error("Please enter a valid email address.");
       return;
     }
     setLoading(true);
@@ -34,7 +38,11 @@ const Membership = () => {
       const { data: membershipResult, error: membershipError } = await supabase.functions.invoke("public-forms", {
         body: {
           action: "submit_membership",
-          data: { donor_email: email, donor_name: name || null, tier: selectedTier.name.toLowerCase() },
+          data: {
+            donor_email: sanitize(email, MAX_LENGTHS.email),
+            donor_name: name ? sanitize(name, MAX_LENGTHS.name) : null,
+            tier: selectedTier.name.toLowerCase(),
+          },
         },
       });
       if (membershipError) throw membershipError;
@@ -43,9 +51,9 @@ const Membership = () => {
       const { data, error } = await supabase.functions.invoke("pesapal-payment", {
         body: {
           amount: selectedTier.price,
-          donor_name: name,
-          donor_email: email,
-          donor_phone: phone,
+          donor_name: sanitize(name, MAX_LENGTHS.name),
+          donor_email: sanitize(email, MAX_LENGTHS.email),
+          donor_phone: sanitize(phone, MAX_LENGTHS.phone),
           description: `${selectedTier.name} Membership - Monthly`,
           is_recurring: true,
           callback_url: window.location.origin + "/?donation=success",
@@ -105,16 +113,26 @@ const Membership = () => {
         </div>
       </section>
 
-      <Dialog open={!!selectedTier} onOpenChange={(open) => !open && setSelectedTier(null)}>
+      <Dialog open={!!selectedTier} onOpenChange={(open) => { if (!open) { setSelectedTier(null); setErrors({}); } }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-serif">Join as {selectedTier?.name}</DialogTitle>
             <DialogDescription>Enter your details to start your {selectedTier ? formatAmount(selectedTier.price) : ""}/month membership.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div><Label htmlFor="member-name">Full Name</Label><Input id="member-name" placeholder="John Doe" className="mt-1" value={name} onChange={(e) => setName(e.target.value)} /></div>
-            <div><Label htmlFor="member-email">Email *</Label><Input id="member-email" type="email" placeholder="john@example.com" className="mt-1" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-            <div><Label htmlFor="member-phone">Phone (for mobile money)</Label><Input id="member-phone" type="tel" placeholder="+256700000000" className="mt-1" value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
+            <div>
+              <Label htmlFor="member-name">Full Name</Label>
+              <Input id="member-name" placeholder="John Doe" className="mt-1" value={name} onChange={(e) => setName(e.target.value)} maxLength={MAX_LENGTHS.name} />
+            </div>
+            <div>
+              <Label htmlFor="member-email">Email *</Label>
+              <Input id="member-email" type="email" placeholder="john@example.com" className="mt-1" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={MAX_LENGTHS.email} />
+              {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
+            </div>
+            <div>
+              <Label htmlFor="member-phone">Phone (for mobile money)</Label>
+              <Input id="member-phone" type="tel" placeholder="+256700000000" className="mt-1" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={MAX_LENGTHS.phone} />
+            </div>
             <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold" disabled={!email || loading} onClick={handleJoin}>
               {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Heart className="w-4 h-4 mr-2 fill-current" />}
               {loading ? "Processing..." : `Pay ${selectedTier ? formatAmount(selectedTier.price) : ""}/month via Pesapal`}
