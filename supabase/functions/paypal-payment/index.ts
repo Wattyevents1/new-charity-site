@@ -134,6 +134,10 @@ serve(async (req) => {
         throw new Error("Failed to create PayPal order");
       }
 
+      // Extract the approval URL from PayPal's response
+      const approveLink = orderData.links?.find((l: { rel: string; href: string }) => l.rel === "payer-action" || l.rel === "approve");
+      const redirectUrl = approveLink?.href;
+
       // Save pending donation record
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
       const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
