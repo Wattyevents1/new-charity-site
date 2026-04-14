@@ -10,11 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { countryCodes, toFlag, DEFAULT_COUNTRY_VALUE, getDialCode } from "@/lib/countryCodes";
+import { validateVolunteerForm, sanitize, MAX_LENGTHS, type ValidationError } from "@/lib/validation";
 
 const benefits = [
   { icon: Heart, title: "Make a Difference", description: "Directly impact lives in communities that need it most." },
   { icon: Users, title: "Join a Community", description: "Connect with like-minded people who share your passion." },
-  { icon: Clock, title: "Flexible Hours", description: "Volunteer on your schedule \u2014 weekends, evenings, or full-time." },
+  { icon: Clock, title: "Flexible Hours", description: "Volunteer on your schedule — weekends, evenings, or full-time." },
   { icon: MapPin, title: "Local & Global", description: "Opportunities available in your city or abroad." },
 ];
 
@@ -27,21 +28,35 @@ const Volunteer = () => {
   const [skills, setSkills] = useState("");
   const [availability, setAvailability] = useState("");
   const [loading, setLoading] = useState(false);
-
-  
+  const [errors, setErrors] = useState<ValidationError>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email) { toast.error("Please enter your name and email."); return; }
+    const validationErrors = validateVolunteerForm({ name, email, phone });
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      toast.error("Please fix the errors below.");
+      return;
+    }
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("public-forms", {
-        body: { action: "submit_volunteer", data: { name, email, phone: phone ? `${getDialCode(countryCode)} ${phone}` : "", area_of_interest: areaOfInterest, skills, availability } },
+        body: {
+          action: "submit_volunteer",
+          data: {
+            name: sanitize(name, MAX_LENGTHS.name),
+            email: sanitize(email, MAX_LENGTHS.email),
+            phone: phone ? `${getDialCode(countryCode)} ${sanitize(phone, MAX_LENGTHS.phone)}` : "",
+            area_of_interest: areaOfInterest,
+            skills: sanitize(skills, MAX_LENGTHS.skills),
+            availability,
+          },
+        },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       toast.success("Application submitted! We'll be in touch.");
-      setName(""); setEmail(""); setPhone(""); setCountryCode(DEFAULT_COUNTRY_VALUE); setAreaOfInterest(""); setSkills(""); setAvailability("");
+      setName(""); setEmail(""); setPhone(""); setCountryCode(DEFAULT_COUNTRY_VALUE); setAreaOfInterest(""); setSkills(""); setAvailability(""); setErrors({});
     } catch (err: any) {
       toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
@@ -76,11 +91,20 @@ const Volunteer = () => {
               <CardContent>
                 <form className="space-y-4" onSubmit={handleSubmit}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><Label htmlFor="vol-name">Full Name</Label><Input id="vol-name" placeholder="Your name" className="mt-1" value={name} onChange={(e) => setName(e.target.value)} /></div>
-                    <div><Label htmlFor="vol-email">Email</Label><Input id="vol-email" type="email" placeholder="you@example.com" className="mt-1" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+                    <div>
+                      <Label htmlFor="vol-name">Full Name</Label>
+                      <Input id="vol-name" placeholder="Your name" className="mt-1" value={name} onChange={(e) => setName(e.target.value)} maxLength={MAX_LENGTHS.name} />
+                      {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
+                    </div>
+                    <div>
+                      <Label htmlFor="vol-email">Email</Label>
+                      <Input id="vol-email" type="email" placeholder="you@example.com" className="mt-1" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={MAX_LENGTHS.email} />
+                      {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
+                    </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><Label htmlFor="vol-phone">Phone</Label>
+                    <div>
+                      <Label htmlFor="vol-phone">Phone</Label>
                       <div className="flex gap-2 mt-1">
                         <Select value={countryCode} onValueChange={setCountryCode}>
                           <SelectTrigger className="w-[120px] shrink-0"><SelectValue /></SelectTrigger>
@@ -92,8 +116,9 @@ const Volunteer = () => {
                             ))}
                           </SelectContent>
                         </Select>
-                        <Input id="vol-phone" type="tel" placeholder="701 703 951" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                        <Input id="vol-phone" type="tel" placeholder="701 703 951" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={MAX_LENGTHS.phone} />
                       </div>
+                      {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
                     </div>
                     <div>
                       <Label>Area of Interest</Label>
@@ -109,7 +134,11 @@ const Volunteer = () => {
                       </Select>
                     </div>
                   </div>
-                  <div><Label htmlFor="vol-skills">Skills & Experience</Label><Textarea id="vol-skills" placeholder="Tell us about your skills..." rows={3} className="mt-1" value={skills} onChange={(e) => setSkills(e.target.value)} /></div>
+                  <div>
+                    <Label htmlFor="vol-skills">Skills & Experience</Label>
+                    <Textarea id="vol-skills" placeholder="Tell us about your skills..." rows={3} className="mt-1" value={skills} onChange={(e) => setSkills(e.target.value)} maxLength={MAX_LENGTHS.skills} />
+                    <p className="text-xs text-muted-foreground mt-1 text-right">{skills.length}/{MAX_LENGTHS.skills}</p>
+                  </div>
                   <div>
                     <Label>Availability</Label>
                     <Select value={availability} onValueChange={setAvailability}><SelectTrigger className="mt-1"><SelectValue placeholder="Select availability" /></SelectTrigger>

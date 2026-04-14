@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { countryCodes, toFlag, DEFAULT_COUNTRY_VALUE, getDialCode } from "@/lib/countryCodes";
+import { validateItemDonationForm, sanitize, MAX_LENGTHS, type ValidationError } from "@/lib/validation";
 
 const DonateItems = () => {
   const [donorName, setDonorName] = useState("");
@@ -20,22 +21,35 @@ const DonateItems = () => {
   const [itemDescription, setItemDescription] = useState("");
   const [pickupLocation, setPickupLocation] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<ValidationError>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!donorName || !donorEmail || !itemDescription) { toast.error("Please fill in all required fields."); return; }
+    const validationErrors = validateItemDonationForm({ donor_name: donorName, donor_email: donorEmail, item_description: itemDescription });
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      toast.error("Please fix the errors below.");
+      return;
+    }
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("public-forms", {
         body: {
           action: "submit_item_donation",
-          data: { donor_name: donorName, donor_email: donorEmail, donor_phone: donorPhone ? `${getDialCode(countryCode)} ${donorPhone}` : "", category, item_description: itemDescription, pickup_location: pickupLocation },
+          data: {
+            donor_name: sanitize(donorName, MAX_LENGTHS.name),
+            donor_email: sanitize(donorEmail, MAX_LENGTHS.email),
+            donor_phone: donorPhone ? `${getDialCode(countryCode)} ${sanitize(donorPhone, MAX_LENGTHS.phone)}` : "",
+            category,
+            item_description: sanitize(itemDescription, MAX_LENGTHS.description),
+            pickup_location: sanitize(pickupLocation, MAX_LENGTHS.location),
+          },
         },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       toast.success("Donation offer submitted! We'll contact you soon.");
-      setDonorName(""); setDonorEmail(""); setCountryCode(DEFAULT_COUNTRY_VALUE); setDonorPhone(""); setCategory(""); setItemDescription(""); setPickupLocation("");
+      setDonorName(""); setDonorEmail(""); setCountryCode(DEFAULT_COUNTRY_VALUE); setDonorPhone(""); setCategory(""); setItemDescription(""); setPickupLocation(""); setErrors({});
     } catch (err: any) {
       toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
@@ -60,8 +74,16 @@ const DonateItems = () => {
             <CardContent>
               <form className="space-y-4" onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div><Label htmlFor="item-name">Your Name</Label><Input id="item-name" placeholder="Your name" className="mt-1" value={donorName} onChange={(e) => setDonorName(e.target.value)} /></div>
-                  <div><Label htmlFor="item-email">Email</Label><Input id="item-email" type="email" placeholder="you@example.com" className="mt-1" value={donorEmail} onChange={(e) => setDonorEmail(e.target.value)} /></div>
+                  <div>
+                    <Label htmlFor="item-name">Your Name</Label>
+                    <Input id="item-name" placeholder="Your name" className="mt-1" value={donorName} onChange={(e) => setDonorName(e.target.value)} maxLength={MAX_LENGTHS.name} />
+                    {errors.donor_name && <p className="text-xs text-destructive mt-1">{errors.donor_name}</p>}
+                  </div>
+                  <div>
+                    <Label htmlFor="item-email">Email</Label>
+                    <Input id="item-email" type="email" placeholder="you@example.com" className="mt-1" value={donorEmail} onChange={(e) => setDonorEmail(e.target.value)} maxLength={MAX_LENGTHS.email} />
+                    {errors.donor_email && <p className="text-xs text-destructive mt-1">{errors.donor_email}</p>}
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="item-phone">Phone Number</Label>
@@ -76,7 +98,7 @@ const DonateItems = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                    <Input id="item-phone" type="tel" placeholder="701 703 951" value={donorPhone} onChange={(e) => setDonorPhone(e.target.value)} />
+                    <Input id="item-phone" type="tel" placeholder="701 703 951" value={donorPhone} onChange={(e) => setDonorPhone(e.target.value)} maxLength={MAX_LENGTHS.phone} />
                   </div>
                 </div>
                 <div>
@@ -93,8 +115,18 @@ const DonateItems = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div><Label htmlFor="item-desc">Item Description</Label><Textarea id="item-desc" placeholder="Describe the items you'd like to donate..." rows={3} className="mt-1" value={itemDescription} onChange={(e) => setItemDescription(e.target.value)} /></div>
-                <div><Label htmlFor="item-location">Pickup / Drop-off Location</Label><Input id="item-location" placeholder="Address for pickup or drop-off" className="mt-1" value={pickupLocation} onChange={(e) => setPickupLocation(e.target.value)} /></div>
+                <div>
+                  <Label htmlFor="item-desc">Item Description</Label>
+                  <Textarea id="item-desc" placeholder="Describe the items you'd like to donate..." rows={3} className="mt-1" value={itemDescription} onChange={(e) => setItemDescription(e.target.value)} maxLength={MAX_LENGTHS.description} />
+                  <div className="flex justify-between mt-1">
+                    {errors.item_description && <p className="text-xs text-destructive">{errors.item_description}</p>}
+                    <p className="text-xs text-muted-foreground ml-auto">{itemDescription.length}/{MAX_LENGTHS.description}</p>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="item-location">Pickup / Drop-off Location</Label>
+                  <Input id="item-location" placeholder="Address for pickup or drop-off" className="mt-1" value={pickupLocation} onChange={(e) => setPickupLocation(e.target.value)} maxLength={MAX_LENGTHS.location} />
+                </div>
                 <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-5" disabled={loading}>
                   {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting...</> : <><Package className="w-4 h-4 mr-2" />Submit Donation Offer</>}
                 </Button>
