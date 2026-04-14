@@ -76,7 +76,7 @@ serve(async (req) => {
 
     // ── Create Order ──
     if (action === "create-order") {
-      const { amount, donor_name, donor_email, donor_phone, description, is_recurring, project_id } = body;
+      const { amount, donor_name, donor_email, donor_phone, description, is_recurring, project_id, callback_url } = body;
 
       if (!donor_email || typeof donor_email !== "string" || !isValidEmail(donor_email)) {
         return new Response(
