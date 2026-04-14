@@ -95,6 +95,10 @@ serve(async (req) => {
 
       const accessToken = await getPayPalAccessToken();
 
+      const originUrl = callback_url || new URL(req.headers.get("origin") || req.url).origin;
+      const returnUrl = `${originUrl}/donation/callback?gateway=paypal`;
+      const cancelUrl = `${originUrl}/donation/callback?gateway=paypal&status=cancelled`;
+
       const orderRes = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders`, {
         method: "POST",
         headers: {
@@ -112,6 +116,15 @@ serve(async (req) => {
               description: description ? sanitizeString(String(description), 500) : "Donation to Al-Imran Muslim Aid",
             },
           ],
+          payment_source: {
+            paypal: {
+              experience_context: {
+                return_url: returnUrl,
+                cancel_url: cancelUrl,
+                user_action: "PAY_NOW",
+              },
+            },
+          },
         }),
       });
 
