@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ArrowRight } from "lucide-react";
 import {
   ChartContainer,
   ChartTooltip,
@@ -27,6 +31,9 @@ interface RecentDonation {
   amount: number;
   created_at: string;
   status: string | null;
+  payment_method: string | null;
+  project_id: string | null;
+  project_title?: string | null;
 }
 
 interface ProjectProgress {
@@ -59,9 +66,9 @@ const AdminDashboard = () => {
         supabase.from("projects").select("id, title, funding_goal, amount_raised").eq("status", "published"),
         supabase
           .from("donations")
-          .select("id, donor_name, amount, created_at, status")
+          .select("id, donor_name, amount, created_at, status, payment_method, project_id")
           .order("created_at", { ascending: false })
-          .limit(6),
+          .limit(8),
         supabase.functions.invoke("admin-api", { body: { action: "dashboard_stats" } }),
       ]);
 
