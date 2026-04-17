@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ArrowRight } from "lucide-react";
 import {
   ChartContainer,
   ChartTooltip,
@@ -27,6 +31,9 @@ interface RecentDonation {
   amount: number;
   created_at: string;
   status: string | null;
+  payment_method: string | null;
+  project_id: string | null;
+  project_title?: string | null;
 }
 
 interface ProjectProgress {
@@ -59,9 +66,9 @@ const AdminDashboard = () => {
         supabase.from("projects").select("id, title, funding_goal, amount_raised").eq("status", "published"),
         supabase
           .from("donations")
-          .select("id, donor_name, amount, created_at, status")
+          .select("id, donor_name, amount, created_at, status, payment_method, project_id")
           .order("created_at", { ascending: false })
-          .limit(6),
+          .limit(8),
         supabase.functions.invoke("admin-api", { body: { action: "dashboard_stats" } }),
       ]);
 
@@ -103,7 +110,12 @@ const AdminDashboard = () => {
         .slice(0, 5);
       setProgressData(progress);
 
-      setRecentDonations(recentRes.data || []);
+      const projectMap = new Map(projects.map((p) => [p.id, p.title]));
+      const recent = (recentRes.data || []).map((d) => ({
+        ...d,
+        project_title: d.project_id ? projectMap.get(d.project_id) || null : null,
+      }));
+      setRecentDonations(recent);
 
       setStats({
         donations: allDonations.length,
@@ -211,32 +223,61 @@ const AdminDashboard = () => {
 
           {/* Recent Donations */}
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <CardTitle className="font-serif">Recent Donations</CardTitle>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/admin/donations" className="gap-1">
+                  View all <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Button>
             </CardHeader>
             <CardContent>
               {recentDonations.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No donations yet.</p>
               ) : (
-                <div className="grid gap-4">
-                  {recentDonations.map((d) => (
-                    <div key={d.id} className="grid grid-cols-2 gap-2 sm:grid-cols-4 items-center text-sm">
-                      <div className="font-medium truncate">{d.donor_name || "Anonymous"}</div>
-                      <div className="text-muted-foreground">{new Date(d.created_at).toLocaleDateString()}</div>
-                      <div className="font-semibold">{formatAmount(Number(d.amount) || 0)}</div>
-                      <div>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          d.status === "completed"
-                            ? "bg-charity-green-light/20 text-charity-green-light"
-                            : d.status === "pending"
-                            ? "bg-charity-gold/20 text-charity-gold"
-                            : "bg-muted text-muted-foreground"
-                        }`}>
-                          {d.status || "unknown"}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Donor</TableHead>
+                        <TableHead>Project</TableHead>
+                        <TableHead>Method</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {recentDonations.map((d) => (
+                        <TableRow key={d.id}>
+                          <TableCell className="font-medium">{d.donor_name || "Anonymous"}</TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {d.project_title || <span className="italic">General</span>}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground capitalize">
+                            {d.payment_method || "—"}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground whitespace-nowrap">
+                            {new Date(d.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="text-right font-semibold">
+                            {formatAmount(Number(d.amount) || 0)}
+                          </TableCell>
+                          <TableCell>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                              d.status === "completed"
+                                ? "bg-charity-green-light/20 text-charity-green-light"
+                                : d.status === "pending"
+                                ? "bg-charity-gold/20 text-charity-gold"
+                                : "bg-muted text-muted-foreground"
+                            }`}>
+                              {d.status || "unknown"}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
               )}
             </CardContent>
