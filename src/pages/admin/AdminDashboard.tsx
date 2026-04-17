@@ -2,49 +2,138 @@ import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Users, FolderKanban, Mail, FileText, Package, Crown } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  Line,
+  LineChart,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  BarChart,
+  Bar,
+} from "recharts";
+import { Heart, Users, FolderKanban, Mail, FileText, Package, Crown, Repeat } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import LogoSpinner from "@/components/ui/LogoSpinner";
 
+interface RecentDonation {
+  id: string;
+  donor_name: string | null;
+  amount: number;
+  created_at: string;
+  status: string | null;
+}
+
+interface ProjectProgress {
+  name: string;
+  progress: number;
+}
+
 const AdminDashboard = () => {
-  const [stats, setStats] = useState({ donations: 0, totalAmount: 0, projects: 0, volunteers: 0, contacts: 0, blogPosts: 0, itemDonations: 0, memberships: 0 });
+  const [stats, setStats] = useState({
+    donations: 0,
+    totalAmount: 0,
+    projects: 0,
+    volunteers: 0,
+    contacts: 0,
+    blogPosts: 0,
+    itemDonations: 0,
+    memberships: 0,
+    recurring: 0,
+  });
+  const [monthlyData, setMonthlyData] = useState<{ month: string; amount: number }[]>([]);
+  const [progressData, setProgressData] = useState<ProjectProgress[]>([]);
+  const [recentDonations, setRecentDonations] = useState<RecentDonation[]>([]);
   const [loading, setLoading] = useState(true);
   const { formatAmount } = useCurrency();
 
   useEffect(() => {
     const fetchStats = async () => {
-      const [donations, projects, adminStats] = await Promise.all([
-        supabase.from("donations").select("amount"),
-        supabase.from("projects").select("id", { count: "exact", head: true }),
+      const [donationsRes, projectsRes, recentRes, adminStats] = await Promise.all([
+        supabase.from("donations").select("amount, created_at, is_recurring, status"),
+        supabase.from("projects").select("id, title, funding_goal, amount_raised").eq("status", "published"),
+        supabase
+          .from("donations")
+          .select("id, donor_name, amount, created_at, status")
+          .order("created_at", { ascending: false })
+          .limit(6),
         supabase.functions.invoke("admin-api", { body: { action: "dashboard_stats" } }),
       ]);
 
-      const totalAmount = (donations.data || []).reduce((sum, d) => sum + (d.amount || 0), 0);
+      const allDonations = donationsRes.data || [];
+      const totalAmount = allDonations.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
+      const recurring = allDonations.filter((d) => d.is_recurring).length;
       const apiStats = adminStats.data || {};
 
+      // Build last 12 months data
+      const now = new Date();
+      const months: { month: string; amount: number }[] = [];
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        months.push({
+          month: d.toLocaleString("en", { month: "short" }),
+          amount: 0,
+        });
+      }
+      allDonations.forEach((d) => {
+        if (d.status !== "completed") return;
+        const date = new Date(d.created_at);
+        const diff = (now.getFullYear() - date.getFullYear()) * 12 + (now.getMonth() - date.getMonth());
+        if (diff >= 0 && diff < 12) {
+          months[11 - diff].amount += Number(d.amount) || 0;
+        }
+      });
+      setMonthlyData(months);
+
+      // Project progress (top 5 by progress)
+      const projects = projectsRes.data || [];
+      const progress = projects
+        .map((p) => ({
+          name: p.title.length > 18 ? p.title.slice(0, 16) + "…" : p.title,
+          progress: p.funding_goal && Number(p.funding_goal) > 0
+            ? Math.min(100, Math.round((Number(p.amount_raised) || 0) / Number(p.funding_goal) * 100))
+            : 0,
+        }))
+        .sort((a, b) => b.progress - a.progress)
+        .slice(0, 5);
+      setProgressData(progress);
+
+      setRecentDonations(recentRes.data || []);
+
       setStats({
-        donations: donations.data?.length || 0,
+        donations: allDonations.length,
         totalAmount,
-        projects: projects.count || 0,
+        projects: projects.length,
         volunteers: apiStats.volunteers || 0,
         contacts: apiStats.contacts || 0,
         blogPosts: apiStats.blogPosts || 0,
         itemDonations: apiStats.itemDonations || 0,
         memberships: apiStats.memberships || 0,
+        recurring,
       });
       setLoading(false);
     };
     fetchStats();
   }, []);
 
-  const cards = [
-    { label: "Total Donations", value: formatAmount(stats.totalAmount), sub: `${stats.donations} donations`, icon: Heart, color: "text-accent" },
-    { label: "Projects", value: stats.projects, sub: "Total projects", icon: FolderKanban, color: "text-primary" },
-    { label: "Volunteers", value: stats.volunteers, sub: "Applications", icon: Users, color: "text-charity-green-light" },
-    { label: "Blog Posts", value: stats.blogPosts, sub: "Published & drafts", icon: FileText, color: "text-charity-gold" },
-    { label: "Contact Messages", value: stats.contacts, sub: "Inbox", icon: Mail, color: "text-charity-orange" },
-    { label: "Item Donations", value: stats.itemDonations, sub: "Submissions", icon: Package, color: "text-primary" },
-    { label: "Memberships", value: stats.memberships, sub: "Active members", icon: Crown, color: "text-charity-gold" },
+  const topCards = [
+    { label: "Total Raised", value: formatAmount(stats.totalAmount), sub: `${stats.donations} donations`, icon: Heart },
+    { label: "Donors", value: stats.donations, sub: "Total donations", icon: Users },
+    { label: "Active Projects", value: stats.projects, sub: "Published", icon: FolderKanban },
+    { label: "Recurring", value: stats.recurring, sub: "Recurring donations", icon: Repeat },
+  ];
+
+  const secondaryCards = [
+    { label: "Volunteers", value: stats.volunteers, icon: Users },
+    { label: "Blog Posts", value: stats.blogPosts, icon: FileText },
+    { label: "Contact Messages", value: stats.contacts, icon: Mail },
+    { label: "Item Donations", value: stats.itemDonations, icon: Package },
+    { label: "Memberships", value: stats.memberships, icon: Crown },
   ];
 
   return (
@@ -52,21 +141,117 @@ const AdminDashboard = () => {
       {loading ? (
         <LogoSpinner message="Loading dashboard..." />
       ) : (
-        <div className="animate-fade-in">
-          <div className="mb-8">
+        <div className="grid gap-6 animate-fade-in">
+          <div>
             <h1 className="font-serif text-3xl font-bold text-foreground">Dashboard</h1>
             <p className="text-muted-foreground mt-1">Welcome back. Here's an overview of your organization.</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {cards.map((card) => (
-              <Card key={card.label} className="border-border/50">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">{card.label}</CardTitle>
-                  <card.icon className={`w-5 h-5 ${card.color}`} />
+
+          {/* Top stats */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {topCards.map((s) => (
+              <Card key={s.label}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{s.label}</CardTitle>
+                  <s.icon className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="font-serif text-2xl font-bold">{card.value}</div>
-                  <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
+                  <div className="font-serif text-2xl font-bold">{s.value}</div>
+                  <p className="text-xs text-muted-foreground mt-1">{s.sub}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Charts */}
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+            <Card className="xl:col-span-2">
+              <CardHeader>
+                <CardTitle className="font-serif">Donations (last 12 months)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer
+                  config={{ amount: { label: "Amount", color: "hsl(var(--primary))" } }}
+                  className="h-80 w-full"
+                >
+                  <LineChart data={monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                    <XAxis dataKey="month" className="text-xs" />
+                    <YAxis className="text-xs" />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Line type="monotone" dataKey="amount" stroke="var(--color-amount)" strokeWidth={2} dot={{ r: 3 }} />
+                  </LineChart>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-serif">Project Progress</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {progressData.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No published projects yet.</p>
+                ) : (
+                  <ChartContainer
+                    config={{ progress: { label: "Progress %", color: "hsl(var(--accent))" } }}
+                    className="h-80 w-full"
+                  >
+                    <BarChart data={progressData} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                      <XAxis type="number" domain={[0, 100]} hide />
+                      <YAxis type="category" dataKey="name" width={100} className="text-xs" />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="progress" fill="var(--color-progress)" radius={[4, 4, 4, 4]} />
+                    </BarChart>
+                  </ChartContainer>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recent Donations */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-serif">Recent Donations</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {recentDonations.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No donations yet.</p>
+              ) : (
+                <div className="grid gap-4">
+                  {recentDonations.map((d) => (
+                    <div key={d.id} className="grid grid-cols-2 gap-2 sm:grid-cols-4 items-center text-sm">
+                      <div className="font-medium truncate">{d.donor_name || "Anonymous"}</div>
+                      <div className="text-muted-foreground">{new Date(d.created_at).toLocaleDateString()}</div>
+                      <div className="font-semibold">{formatAmount(Number(d.amount) || 0)}</div>
+                      <div>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                          d.status === "completed"
+                            ? "bg-charity-green-light/20 text-charity-green-light"
+                            : d.status === "pending"
+                            ? "bg-charity-gold/20 text-charity-gold"
+                            : "bg-muted text-muted-foreground"
+                        }`}>
+                          {d.status || "unknown"}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Secondary stats */}
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            {secondaryCards.map((s) => (
+              <Card key={s.label} className="border-border/50">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-xs font-medium text-muted-foreground">{s.label}</CardTitle>
+                  <s.icon className="w-4 h-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="font-serif text-xl font-bold">{s.value}</div>
                 </CardContent>
               </Card>
             ))}
