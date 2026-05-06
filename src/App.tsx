@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { CurrencyProvider } from "@/hooks/useCurrency";
 import ProtectedRoute from "@/components/admin/ProtectedRoute";
 import ScrollToTop from "@/components/ScrollToTop";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Projects from "./pages/Projects";
@@ -42,6 +43,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <SpeedInsights />
       <CurrencyProvider>
       <AuthProvider>
         <BrowserRouter>
