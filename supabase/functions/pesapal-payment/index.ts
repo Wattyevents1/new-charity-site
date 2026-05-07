@@ -355,8 +355,9 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Pesapal payment error:", error);
-    return new Response(JSON.stringify({ error: "An unexpected error occurred. Please try again." }), {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Pesapal payment error:", message, error instanceof Error ? error.stack : "");
+    return new Response(JSON.stringify({ error: message || "An unexpected error occurred. Please try again." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
