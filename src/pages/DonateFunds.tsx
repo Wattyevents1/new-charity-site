@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
+import SEO from "@/components/SEO";
 import { Heart, CreditCard, Smartphone, Globe, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -98,6 +99,10 @@ const DonateFunds = () => {
 
   return (
     <Layout>
+      <SEO
+        title="Donate Funds"
+        description="Support Al-Imran Muslim Aid securely with PayPal or Pesapal. Every donation funds projects that uplift communities in Uganda and East Africa."
+      />
       <section className="bg-gradient-hero text-primary-foreground py-20 md:py-28">
         <div className="container mx-auto px-4 text-center">
           <Heart className="w-12 h-12 mx-auto mb-6 text-charity-gold fill-current" />

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import LogoSpinner from "@/components/ui/LogoSpinner";
 import { Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
+import SEO from "@/components/SEO";
 import { MapPin, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,10 @@ const Projects = () => {
 
   return (
     <Layout>
+      <SEO
+        title="Our Charity Projects"
+        description="Explore Al-Imran Muslim Aid's humanitarian projects across education, healthcare, water, food security, and emergency relief."
+      />
       <section className="bg-primary text-primary-foreground py-20 md:py-28">
         <div className="container mx-auto px-4 text-center">
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-6">Our Projects</h1>

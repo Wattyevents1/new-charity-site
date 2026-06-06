@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
+import SEO from "@/components/SEO";
 import { Heart, Star, Crown, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -76,6 +77,10 @@ const Membership = () => {
 
   return (
     <Layout>
+      <SEO
+        title="Become a Member"
+        description="Join Al-Imran Muslim Aid as a member and help sustain long-term humanitarian work across Uganda and East Africa."
+      />
       <section className="bg-gradient-hero text-primary-foreground py-20 md:py-28">
         <div className="container mx-auto px-4 text-center">
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-6">Membership Plans</h1>
