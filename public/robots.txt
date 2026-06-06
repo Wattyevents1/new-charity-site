@@ -12,3 +12,6 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+
+Sitemap: https://al-imran-muslim-aid.lovable.app/sitemap.xml
