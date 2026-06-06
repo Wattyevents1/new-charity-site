@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import SEO from "@/components/SEO";
 
 interface BlogPost {
   id: string;
@@ -48,6 +49,10 @@ const Blog = () => {
 
   return (
     <Layout>
+      <SEO
+        title="Charity News & Stories"
+        description="Read the latest stories of impact, field updates, and humanitarian insights from Al-Imran Muslim Aid's work across Uganda and East Africa."
+      />
       <section className="bg-primary text-primary-foreground py-20 md:py-28">
         <div className="container mx-auto px-4 text-center">
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-6">Blog & News</h1>
@@ -84,7 +89,7 @@ const Blog = () => {
                     <h3 className="font-serif text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">{post.title}</h3>
                     {post.excerpt && <p className="text-muted-foreground text-sm mb-4">{post.excerpt}</p>}
                     <div className="flex items-center justify-between">
-                      <Button variant="link" className="p-0 h-auto text-accent font-semibold gap-1">Read More <ArrowRight className="w-4 h-4" /></Button>
+                      <Button variant="link" className="p-0 h-auto text-accent font-semibold gap-1" aria-label={`Read full story: ${post.title}`}>Read full story <ArrowRight className="w-4 h-4" /></Button>
                       <SocialShareButtons url={`${window.location.origin}/blog/${post.id}`} title={post.title} />
                     </div>
                   </CardContent>
