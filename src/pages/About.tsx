@@ -1,4 +1,5 @@
 import Layout from "@/components/layout/Layout";
+import SEO from "@/components/SEO";
 import { Target, Eye, MapPin, Users, Heart, Briefcase } from "lucide-react";
 import teamImran from "@/assets/team-imran.jpg";
 import teamTwaha from "@/assets/team-twaha.jpg";
@@ -8,6 +9,10 @@ import { Card, CardContent } from "@/components/ui/card";
 const About = () => {
   return (
     <Layout>
+      <SEO
+        title="About Us"
+        description="Learn about Al-Imran Muslim Aid's mission, leadership team, and commitment to sustainable development across Uganda and East Africa."
+      />
       <section className="bg-primary text-primary-foreground py-20 md:py-28">
         <div className="container mx-auto px-4 text-center">
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-6">About Us</h1>

@@ -7,6 +7,7 @@ import FeaturedProjects from "@/components/home/FeaturedProjects";
 import UrgentAppeals from "@/components/home/UrgentAppeals";
 import Testimonials from "@/components/home/Testimonials";
 import { toast } from "sonner";
+import SEO from "@/components/SEO";
 
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -20,6 +21,10 @@ const Index = () => {
 
   return (
     <Layout>
+      <SEO
+        title="Al-Imran Muslim Aid — Making a Difference Together"
+        description="Support Al-Imran Muslim Aid's humanitarian projects in Uganda and East Africa. Donate, volunteer, or join urgent appeals to empower communities."
+      />
       <HeroSection />
       <ImpactStats />
       <FeaturedProjects />

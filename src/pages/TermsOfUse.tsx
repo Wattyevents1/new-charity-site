@@ -1,8 +1,13 @@
 import Layout from "@/components/layout/Layout";
+import SEO from "@/components/SEO";
 
 const TermsOfUse = () => {
   return (
     <Layout>
+      <SEO
+        title="Terms of Use"
+        description="Review the terms governing your use of the Al-Imran Muslim Aid website, donations, and online services."
+      />
       <section className="bg-primary text-primary-foreground py-20 md:py-28">
         <div className="container mx-auto px-4 text-center">
           <h1 className="font-serif text-4xl md:text-5xl font-bold mb-6">Terms of Use</h1>

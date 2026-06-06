@@ -1,0 +1,24 @@
+# Al-Imran Muslim Aid
+
+> A registered charity in Uganda and East Africa empowering communities through sustainable development, education, and compassionate humanitarian action for the Ummah.
+
+Al-Imran Muslim Aid (AIMA) runs projects in education, healthcare, water, food security, and emergency relief. Visitors can donate funds or items, volunteer, become members, or follow urgent appeals.
+
+## Pages
+
+- [Home](/): Mission overview, impact stats, featured projects, urgent appeals.
+- [About Us](/about): History, leadership team, and values.
+- [Our Projects](/projects): Active humanitarian initiatives.
+- [Donate Funds](/donate): Support projects financially via PayPal or Pesapal.
+- [Donate Items](/donate-items): Contribute physical goods.
+- [Membership](/membership): Become a member.
+- [Volunteer](/volunteer): Join volunteer programs.
+- [Urgent Appeals](/urgent-appeals): Time-sensitive humanitarian needs.
+- [Blog & News](/blog): Stories of impact and field updates.
+- [Careers](/careers): Open positions.
+- [Contact](/contact): Reach out to the team.
+
+## Optional
+
+- [Privacy Policy](/privacy)
+- [Terms of Use](/terms)

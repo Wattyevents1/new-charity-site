@@ -9,6 +9,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { validateContactForm, sanitize, MAX_LENGTHS, type ValidationError } from "@/lib/validation";
+import SEO from "@/components/SEO";
+
+const contactJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  name: "Contact Al-Imran Muslim Aid",
+  url: "https://al-imran-muslim-aid.lovable.app/contact",
+};
 
 const contactInfo = [
   { icon: MapPin, label: "Address", value: "Plot 9 Namakwekwe, Mbale, Uganda" },
@@ -59,6 +67,11 @@ const Contact = () => {
 
   return (
     <Layout>
+      <SEO
+        title="Contact Us"
+        description="Get in touch with Al-Imran Muslim Aid. Reach our team in Mbale, Uganda by phone, email, or send a message — we'd love to hear from you."
+        jsonLd={contactJsonLd}
+      />
       <section className="bg-primary text-primary-foreground py-20 md:py-28">
         <div className="container mx-auto px-4 text-center">
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-6">Contact Us</h1>

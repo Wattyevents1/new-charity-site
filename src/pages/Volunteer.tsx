@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
+import SEO from "@/components/SEO";
 import { Heart, Clock, MapPin, Users, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,6 +67,10 @@ const Volunteer = () => {
 
   return (
     <Layout>
+      <SEO
+        title="Volunteer With Us"
+        description="Volunteer with Al-Imran Muslim Aid and put your time and skills to work on humanitarian projects across Uganda and East Africa."
+      />
       <section className="bg-primary text-primary-foreground py-20 md:py-28">
         <div className="container mx-auto px-4 text-center">
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-6">Become a Volunteer</h1>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
+import SEO from "@/components/SEO";
 import { Briefcase, MapPin, Clock, ArrowRight } from "lucide-react";
 import LogoSpinner from "@/components/ui/LogoSpinner";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,10 @@ const Careers = () => {
 
   return (
     <Layout>
+      <SEO
+        title="Careers"
+        description="Explore open positions and career opportunities with Al-Imran Muslim Aid — work that makes a real humanitarian impact."
+      />
       <section className="bg-primary text-primary-foreground py-20 md:py-28">
         <div className="container mx-auto px-4 text-center">
           <Briefcase className="w-12 h-12 mx-auto mb-6 text-charity-gold" />

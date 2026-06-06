@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
+import SEO from "@/components/SEO";
 import { Package, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +60,10 @@ const DonateItems = () => {
 
   return (
     <Layout>
+      <SEO
+        title="Donate Items"
+        description="Contribute clothing, food, books, or other essentials to Al-Imran Muslim Aid's humanitarian programs across Uganda."
+      />
       <section className="bg-primary text-primary-foreground py-20 md:py-28">
         <div className="container mx-auto px-4 text-center">
           <Package className="w-12 h-12 mx-auto mb-6 text-charity-gold" />
