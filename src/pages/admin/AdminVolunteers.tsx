@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { extractFunctionError } from "@/lib/functionError";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,7 +19,7 @@ const AdminVolunteers = () => {
     const { data, error } = await supabase.functions.invoke("admin-api", {
       body: { action: "list", entity: "volunteers" },
     });
-    if (error) { toast.error("Failed to load volunteers"); return; }
+    if (error) { toast.error(await extractFunctionError(error, "Failed to load volunteers")); return; }
     setVolunteers(Array.isArray(data) ? data : []);
   };
 
@@ -28,7 +29,7 @@ const AdminVolunteers = () => {
     const { data, error } = await supabase.functions.invoke("admin-api", {
       body: { action: "update", entity: "volunteers", id, data: { status } },
     });
-    if (error || data?.error) { toast.error(data?.error || "Update failed"); return; }
+    if (error || data?.error) { toast.error(data?.error || (error ? await extractFunctionError(error, "Update failed") : "Update failed")); return; }
     toast.success(`Status updated to ${status}`);
     fetchVolunteers();
   };
