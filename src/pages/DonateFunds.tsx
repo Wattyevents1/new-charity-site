@@ -41,27 +41,8 @@ const DonateFunds = () => {
     return true;
   };
 
-  const extractFunctionError = async (error: any, fallback: string): Promise<string> => {
-    try {
-      if (error?.context && typeof error.context.json === "function") {
-        const body = await error.context.json();
-        if (body?.error) return typeof body.error === "string" ? body.error : JSON.stringify(body.error);
-      } else if (error?.context && typeof error.context.text === "function") {
-        const text = await error.context.text();
-        if (text) {
-          try {
-            const parsed = JSON.parse(text);
-            if (parsed?.error) return typeof parsed.error === "string" ? parsed.error : JSON.stringify(parsed.error);
-          } catch {
-            return text;
-          }
-        }
-      }
-    } catch {
-      // ignore
-    }
-    return error?.message || fallback;
-  };
+
+
 
   const handlePesapalPayment = async () => {
     if (!validateForm()) return;
