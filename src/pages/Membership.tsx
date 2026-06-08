@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { extractFunctionError } from "@/lib/functionError";
 import { toast } from "sonner";
 import { useCurrency } from "@/hooks/useCurrency";
 import { validateMembershipForm, sanitize, MAX_LENGTHS, type ValidationError } from "@/lib/validation";
@@ -46,7 +47,7 @@ const Membership = () => {
           },
         },
       });
-      if (membershipError) throw membershipError;
+      if (membershipError) throw new Error(await extractFunctionError(membershipError));
       if (membershipResult?.error) throw new Error(membershipResult.error);
 
       const { data, error } = await supabase.functions.invoke("pesapal-payment", {
@@ -60,7 +61,7 @@ const Membership = () => {
           callback_url: window.location.origin + "/?donation=success",
         },
       });
-      if (error) throw error;
+      if (error) throw new Error(await extractFunctionError(error));
 
       if (data?.redirect_url) {
         window.location.href = data.redirect_url;

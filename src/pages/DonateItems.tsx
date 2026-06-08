@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { extractFunctionError } from "@/lib/functionError";
 import { toast } from "sonner";
 import { countryCodes, toFlag, DEFAULT_COUNTRY_VALUE, getDialCode } from "@/lib/countryCodes";
 import { validateItemDonationForm, sanitize, MAX_LENGTHS, type ValidationError } from "@/lib/validation";
@@ -47,7 +48,7 @@ const DonateItems = () => {
           },
         },
       });
-      if (error) throw error;
+      if (error) throw new Error(await extractFunctionError(error));
       if (data?.error) throw new Error(data.error);
       toast.success("Donation offer submitted! We'll contact you soon.");
       setDonorName(""); setDonorEmail(""); setCountryCode(DEFAULT_COUNTRY_VALUE); setDonorPhone(""); setCategory(""); setItemDescription(""); setPickupLocation(""); setErrors({});

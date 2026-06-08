@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { extractFunctionError } from "@/lib/functionError";
 import SEO from "@/components/SEO";
 
 interface BlogPost {
@@ -30,7 +31,7 @@ const Blog = () => {
         const { data, error } = await supabase.functions.invoke("public-forms", {
           body: { action: "list_published_posts" },
         });
-        if (error) throw error;
+        if (error) throw new Error(await extractFunctionError(error));
         setPosts(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Failed to load blog posts:", err);

@@ -5,6 +5,7 @@ import { CheckCircle, XCircle, Clock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { extractFunctionError } from "@/lib/functionError";
 
 type DonationStatus = "success" | "failed" | "cancelled" | "pending" | "loading";
 
@@ -93,7 +94,7 @@ const DonationCallback = () => {
       const { data, error } = await supabase.functions.invoke("paypal-payment", {
         body: { action: "capture-order", order_id: orderId },
       });
-      if (error) throw error;
+      if (error) throw new Error(await extractFunctionError(error));
       if (data?.status === "completed") {
         setStatus("success");
         if (data.transaction_id) setTransactionId(data.transaction_id);
@@ -112,7 +113,7 @@ const DonationCallback = () => {
         body: { action: "check-status", order_tracking_id: orderTrackingId, merchant_reference: merchantRef },
       });
 
-      if (error) throw error;
+      if (error) throw new Error(await extractFunctionError(error));
 
       if (data?.status === "completed") {
         setStatus("success");

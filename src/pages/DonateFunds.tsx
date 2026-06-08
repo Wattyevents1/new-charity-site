@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { validateDonationForm, sanitize, MAX_LENGTHS, isValidEmail, type ValidationError } from "@/lib/validation";
+import { extractFunctionError } from "@/lib/functionError";
 
 const presetAmounts = [10, 25, 50, 100, 250, 500];
 
@@ -40,27 +41,8 @@ const DonateFunds = () => {
     return true;
   };
 
-  const extractFunctionError = async (error: any, fallback: string): Promise<string> => {
-    try {
-      if (error?.context && typeof error.context.json === "function") {
-        const body = await error.context.json();
-        if (body?.error) return typeof body.error === "string" ? body.error : JSON.stringify(body.error);
-      } else if (error?.context && typeof error.context.text === "function") {
-        const text = await error.context.text();
-        if (text) {
-          try {
-            const parsed = JSON.parse(text);
-            if (parsed?.error) return typeof parsed.error === "string" ? parsed.error : JSON.stringify(parsed.error);
-          } catch {
-            return text;
-          }
-        }
-      }
-    } catch {
-      // ignore
-    }
-    return error?.message || fallback;
-  };
+
+
 
   const handlePesapalPayment = async () => {
     if (!validateForm()) return;

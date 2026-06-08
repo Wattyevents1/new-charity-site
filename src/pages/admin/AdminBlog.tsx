@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { extractFunctionError } from "@/lib/functionError";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,7 +32,7 @@ const AdminBlog = () => {
     const { data, error } = await supabase.functions.invoke("admin-api", {
       body: { action: "list", entity: "blog_posts" },
     });
-    if (error) { toast.error("Failed to load posts"); return; }
+    if (error) { toast.error(await extractFunctionError(error, "Failed to load posts")); return; }
     setPosts(Array.isArray(data) ? data : []);
   };
 
@@ -43,7 +44,7 @@ const AdminBlog = () => {
       ? { action: "update", entity: "blog_posts", id: editingId, data: payload }
       : { action: "create", entity: "blog_posts", data: payload };
     const { data, error } = await supabase.functions.invoke("admin-api", { body });
-    if (error || data?.error) { toast.error(data?.error || "Save failed"); return; }
+    if (error || data?.error) { toast.error(data?.error || (error ? await extractFunctionError(error, "Save failed") : "Save failed")); return; }
     toast.success(editingId ? "Post updated" : "Post created");
     setOpen(false); setForm(emptyForm); setEditingId(null); fetchPosts();
   };
@@ -58,7 +59,7 @@ const AdminBlog = () => {
     const { data, error } = await supabase.functions.invoke("admin-api", {
       body: { action: "delete", entity: "blog_posts", id },
     });
-    if (error || data?.error) { toast.error(data?.error || "Delete failed"); return; }
+    if (error || data?.error) { toast.error(data?.error || (error ? await extractFunctionError(error, "Delete failed") : "Delete failed")); return; }
     toast.success("Post deleted"); fetchPosts();
   };
 

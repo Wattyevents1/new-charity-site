@@ -6,6 +6,7 @@ import LogoSpinner from "@/components/ui/LogoSpinner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { extractFunctionError } from "@/lib/functionError";
 
 interface Career {
   id: string;
@@ -26,7 +27,7 @@ const Careers = () => {
         const { data, error } = await supabase.functions.invoke("public-forms", {
           body: { action: "list_open_careers" },
         });
-        if (error) throw error;
+        if (error) throw new Error(await extractFunctionError(error));
         setJobs(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Failed to load careers:", err);

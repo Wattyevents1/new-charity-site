@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { extractFunctionError } from "@/lib/functionError";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +20,7 @@ const AdminContacts = () => {
     const { data, error } = await supabase.functions.invoke("admin-api", {
       body: { action: "list", entity: "contact_submissions" },
     });
-    if (error) { toast.error("Failed to load contacts"); return; }
+    if (error) { toast.error(await extractFunctionError(error, "Failed to load contacts")); return; }
     setContacts(Array.isArray(data) ? data : []);
   };
 
@@ -29,7 +30,7 @@ const AdminContacts = () => {
     const { data, error } = await supabase.functions.invoke("admin-api", {
       body: { action: "update", entity: "contact_submissions", id, data: { is_read: true } },
     });
-    if (error || data?.error) { toast.error(data?.error || "Update failed"); return; }
+    if (error || data?.error) { toast.error(data?.error || (error ? await extractFunctionError(error, "Update failed") : "Update failed")); return; }
     toast.success("Marked as read");
     fetchContacts();
   };

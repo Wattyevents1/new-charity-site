@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { extractFunctionError } from "@/lib/functionError";
 import { toast } from "sonner";
 import { validateContactForm, sanitize, MAX_LENGTHS, type ValidationError } from "@/lib/validation";
 import SEO from "@/components/SEO";
@@ -54,7 +55,7 @@ const Contact = () => {
           },
         },
       });
-      if (error) throw error;
+      if (error) throw new Error(await extractFunctionError(error));
       if (data?.error) throw new Error(data.error);
       toast.success("Message sent! We'll get back to you soon.");
       setName(""); setEmail(""); setSubject(""); setMessage(""); setErrors({});

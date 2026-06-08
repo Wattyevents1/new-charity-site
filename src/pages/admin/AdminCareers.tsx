@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { extractFunctionError } from "@/lib/functionError";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,7 +31,7 @@ const AdminCareers = () => {
     const { data, error } = await supabase.functions.invoke("admin-api", {
       body: { action: "list", entity: "careers" },
     });
-    if (error) { toast.error("Failed to load careers"); return; }
+    if (error) { toast.error(await extractFunctionError(error, "Failed to load careers")); return; }
     setCareers(Array.isArray(data) ? data : []);
   };
 
@@ -41,7 +42,7 @@ const AdminCareers = () => {
       ? { action: "update", entity: "careers", id: editingId, data: form }
       : { action: "create", entity: "careers", data: form };
     const { data, error } = await supabase.functions.invoke("admin-api", { body });
-    if (error || data?.error) { toast.error(data?.error || "Save failed"); return; }
+    if (error || data?.error) { toast.error(data?.error || (error ? await extractFunctionError(error, "Save failed") : "Save failed")); return; }
     toast.success(editingId ? "Job updated" : "Job created");
     setOpen(false); setForm(emptyForm); setEditingId(null); fetchCareers();
   };
@@ -56,7 +57,7 @@ const AdminCareers = () => {
     const { data, error } = await supabase.functions.invoke("admin-api", {
       body: { action: "delete", entity: "careers", id },
     });
-    if (error || data?.error) { toast.error(data?.error || "Delete failed"); return; }
+    if (error || data?.error) { toast.error(data?.error || (error ? await extractFunctionError(error, "Delete failed") : "Delete failed")); return; }
     toast.success("Job deleted"); fetchCareers();
   };
 
