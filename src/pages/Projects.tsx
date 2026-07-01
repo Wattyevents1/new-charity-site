@@ -7,10 +7,7 @@ import { MapPin, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
-import { useProjectDonations } from "@/hooks/useProjectDonations";
-import { useCurrency } from "@/hooks/useCurrency";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects">;
