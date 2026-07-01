@@ -17,8 +17,6 @@ const Projects = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
-  const donationTotals = useProjectDonations();
-  const { formatAmount } = useCurrency();
 
   useEffect(() => {
     const fetchProjects = async () => {
