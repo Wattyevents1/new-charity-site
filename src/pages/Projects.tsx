@@ -75,21 +75,28 @@ const Projects = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 animate-fade-in">
             {filtered.map((project) => (
               <Card key={project.id} className="overflow-hidden group hover:shadow-elevated transition-all duration-300 border-border/50 flex flex-col">
-                <div className="relative overflow-hidden aspect-[3/2]">
-                  <img src={project.image_url || "/placeholder.svg"} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                  <div className="absolute top-3 left-3 flex gap-2">
-                    <span className="px-3 py-1 bg-primary/90 text-primary-foreground text-xs font-medium rounded-full backdrop-blur-sm">{project.category}</span>
-                    {project.status === "completed" && <span className="px-3 py-1 bg-charity-gold/90 text-foreground text-xs font-medium rounded-full backdrop-blur-sm">Completed</span>}
+                <Link to={`/projects/${project.id}`} className="block">
+                  <div className="relative overflow-hidden aspect-[3/2]">
+                    <img src={project.image_url || "/placeholder.svg"} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    <div className="absolute top-3 left-3 flex gap-2">
+                      <span className="px-3 py-1 bg-primary/90 text-primary-foreground text-xs font-medium rounded-full backdrop-blur-sm">{project.category}</span>
+                      {project.status === "completed" && <span className="px-3 py-1 bg-charity-gold/90 text-foreground text-xs font-medium rounded-full backdrop-blur-sm">Completed</span>}
+                    </div>
                   </div>
-                </div>
+                </Link>
                 <CardContent className="p-5 flex flex-col flex-1">
                   <div className="flex items-center gap-1 text-muted-foreground text-sm mb-2">
                     <MapPin className="w-3.5 h-3.5" /><span>{project.location}</span>
                   </div>
-                  <h3 className="font-serif text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">{project.title}</h3>
-                  <p className="text-muted-foreground text-sm mb-4 whitespace-pre-line flex-1">{project.long_description || project.description}</p>
-                  <div className="flex justify-end mt-auto pt-2">
+                  <Link to={`/projects/${project.id}`}>
+                    <h3 className="font-serif text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">{project.title}</h3>
+                  </Link>
+                  <p className="text-muted-foreground text-sm mb-4 line-clamp-4 whitespace-pre-line flex-1">{project.long_description || project.description}</p>
+                  <div className="flex items-center justify-between gap-2 mt-auto pt-2">
                     <Link to={`/projects/${project.id}`}>
+                      <Button size="sm" variant="outline">Read more</Button>
+                    </Link>
+                    <Link to={`/donate?project=${project.id}`}>
                       <Button size="sm" className="bg-accent hover:bg-accent/90 text-accent-foreground">{project.status === "completed" ? "View" : "Donate"}</Button>
                     </Link>
                   </div>
