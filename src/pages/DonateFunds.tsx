@@ -18,6 +18,8 @@ const presetAmounts = [10, 25, 50, 100, 250, 500];
 
 const DonateFunds = () => {
   const navigate = useNavigate();
+  const { currency, formatAmount } = useCurrency();
+  const currencySymbol = currencies[currency].symbol;
   const [amount, setAmount] = useState<number | "">("");
   const [donationType, setDonationType] = useState<"one-time" | "monthly">("one-time");
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
