@@ -150,8 +150,8 @@ const DonateFunds = () => {
                 <div className="mb-8">
                   <Label htmlFor="custom-amount" className="text-sm font-medium mb-2 block">Or enter a custom amount</Label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
-                    <Input id="custom-amount" type="number" placeholder="0.00" value={amount} onChange={(e) => handleCustomAmount(e.target.value)} className="pl-8 text-lg h-12" min="1" max="1000000" />
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">{currencySymbol}</span>
+                    <Input id="custom-amount" type="number" placeholder="0.00" value={amount} onChange={(e) => handleCustomAmount(e.target.value)} className={currency === "UGX" ? "pl-14 text-lg h-12" : "pl-8 text-lg h-12"} min="1" max="1000000" />
                   </div>
                   {errors.amount && <p className="text-xs text-destructive mt-1">{errors.amount}</p>}
                 </div>
