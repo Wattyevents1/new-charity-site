@@ -12,11 +12,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { validateDonationForm, sanitize, MAX_LENGTHS, isValidEmail, type ValidationError } from "@/lib/validation";
 import { extractFunctionError } from "@/lib/functionError";
+import { useCurrency, currencies } from "@/hooks/useCurrency";
 
 const presetAmounts = [10, 25, 50, 100, 250, 500];
 
 const DonateFunds = () => {
   const navigate = useNavigate();
+  const { currency, formatAmount } = useCurrency();
+  const currencySymbol = currencies[currency].symbol;
   const [amount, setAmount] = useState<number | "">("");
   const [donationType, setDonationType] = useState<"one-time" | "monthly">("one-time");
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
@@ -139,7 +142,7 @@ const DonateFunds = () => {
                 <div className="grid grid-cols-3 gap-3 mb-6">
                   {presetAmounts.map((preset) => (
                     <button key={preset} onClick={() => handlePresetClick(preset)} className={`py-3 px-4 rounded-lg border-2 font-semibold text-lg transition-all ${selectedPreset === preset ? "border-accent bg-accent/10 text-accent" : "border-border hover:border-accent/50 text-foreground"}`}>
-                      ${preset}
+                      {formatAmount(preset)}
                     </button>
                   ))}
                 </div>
@@ -147,8 +150,8 @@ const DonateFunds = () => {
                 <div className="mb-8">
                   <Label htmlFor="custom-amount" className="text-sm font-medium mb-2 block">Or enter a custom amount</Label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
-                    <Input id="custom-amount" type="number" placeholder="0.00" value={amount} onChange={(e) => handleCustomAmount(e.target.value)} className="pl-8 text-lg h-12" min="1" max="1000000" />
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">{currencySymbol}</span>
+                    <Input id="custom-amount" type="number" placeholder="0.00" value={amount} onChange={(e) => handleCustomAmount(e.target.value)} className={currency === "UGX" ? "pl-14 text-lg h-12" : "pl-8 text-lg h-12"} min="1" max="1000000" />
                   </div>
                   {errors.amount && <p className="text-xs text-destructive mt-1">{errors.amount}</p>}
                 </div>
@@ -200,7 +203,7 @@ const DonateFunds = () => {
                   onClick={activeTab === "pesapal" ? handlePesapalPayment : handlePayPalPayment}
                 >
                   {loading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Heart className="w-5 h-5 mr-2 fill-current" />}
-                  {loading ? "Processing..." : `Donate ${amount ? `$${amount}` : ""} ${donationType === "monthly" ? "Monthly" : ""}`}
+                  {loading ? "Processing..." : `Donate ${amount ? formatAmount(Number(amount)) : ""} ${donationType === "monthly" ? "Monthly" : ""}`}
                 </Button>
                 <p className="text-center text-xs text-muted-foreground mt-4">Your donation is secure and encrypted. You'll receive a receipt via email.</p>
               </CardContent>
