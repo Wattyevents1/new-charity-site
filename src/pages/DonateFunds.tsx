@@ -142,7 +142,7 @@ const DonateFunds = () => {
                 <div className="grid grid-cols-3 gap-3 mb-6">
                   {presetAmounts.map((preset) => (
                     <button key={preset} onClick={() => handlePresetClick(preset)} className={`py-3 px-4 rounded-lg border-2 font-semibold text-lg transition-all ${selectedPreset === preset ? "border-accent bg-accent/10 text-accent" : "border-border hover:border-accent/50 text-foreground"}`}>
-                      ${preset}
+                      {formatAmount(preset)}
                     </button>
                   ))}
                 </div>
