@@ -212,7 +212,7 @@ serve(async (req) => {
       }
 
       return new Response(
-        JSON.stringify({ status: "completed", transaction_id: captureId }),
+        JSON.stringify({ status: "completed", transaction_id: captureId, amount: donation ? Number(donation.amount) : null }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

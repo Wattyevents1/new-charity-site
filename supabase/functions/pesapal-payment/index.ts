@@ -224,11 +224,13 @@ serve(async (req) => {
 
         const pesapalStatus = (statusData.payment_status_description || "").toLowerCase();
         let mappedStatus = "pending";
+        let donationAmount: number | null = null;
 
         if (pesapalStatus === "completed") {
           mappedStatus = "completed";
           if (merchant_reference) {
-            await updateDonationStatus(merchant_reference, "completed");
+            const donation = await updateDonationStatus(merchant_reference, "completed");
+            if (donation) donationAmount = Number(donation.amount);
           }
         } else if (pesapalStatus === "failed" || pesapalStatus === "invalid") {
           mappedStatus = "failed";
@@ -241,6 +243,7 @@ serve(async (req) => {
           JSON.stringify({
             status: mappedStatus,
             transaction_id: statusData.payment_account || merchant_reference,
+            amount: donationAmount,
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
