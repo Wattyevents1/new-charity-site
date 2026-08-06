@@ -1,7 +1,6 @@
-import { useCurrency, currencies, type CurrencyCode } from "@/hooks/useCurrency";
+import { useCurrency } from "@/hooks/useCurrency";
+import { currencies, currencyOptions, currencySymbol, type CurrencyCode } from "@/lib/currency";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-const currencyOptions: CurrencyCode[] = ["EUR", "USD", "GBP", "UGX"];
 
 const CurrencySelector = () => {
   const { currency, setCurrency } = useCurrency();
@@ -14,7 +13,7 @@ const CurrencySelector = () => {
       <SelectContent>
         {currencyOptions.map((code) => (
           <SelectItem key={code} value={code} className="text-xs">
-            {currencies[code].symbol === code ? code : `${currencies[code].symbol} ${code}`}
+            {currencySymbol(code) === code ? code : `${currencies[code].symbol} ${code}`}
           </SelectItem>
         ))}
       </SelectContent>

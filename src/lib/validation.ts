@@ -59,7 +59,7 @@ export function validateDonationForm(data: { donor_email: string; amount?: numbe
   if (data.amount !== undefined) {
     const num = Number(data.amount);
     if (!data.amount || isNaN(num) || num <= 0) errors.amount = "Please enter a valid amount";
-    if (num > 1_000_000) errors.amount = "Amount cannot exceed $1,000,000";
+    if (num > 1_000_000) errors.amount = "Amount cannot exceed 1,000,000";
   }
   return errors;
 }

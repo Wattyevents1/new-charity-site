@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { extractFunctionError } from "@/lib/functionError";
+import { useCurrency } from "@/hooks/useCurrency";
 
 type DonationStatus = "success" | "failed" | "cancelled" | "pending" | "loading";
 
@@ -52,6 +53,8 @@ const DonationCallback = () => {
   const navigate = useNavigate();
   const [status, setStatus] = useState<DonationStatus>("loading");
   const [transactionId, setTransactionId] = useState<string | null>(null);
+  const [amount, setAmount] = useState<number | null>(null);
+  const { formatAmount, currency } = useCurrency();
 
   useEffect(() => {
     const gateway = searchParams.get("gateway");
@@ -98,6 +101,7 @@ const DonationCallback = () => {
       if (data?.status === "completed") {
         setStatus("success");
         if (data.transaction_id) setTransactionId(data.transaction_id);
+        if (data.amount != null) setAmount(Number(data.amount));
       } else {
         setStatus("failed");
       }
@@ -118,6 +122,7 @@ const DonationCallback = () => {
       if (data?.status === "completed") {
         setStatus("success");
         if (data.transaction_id) setTransactionId(data.transaction_id);
+        if (data.amount != null) setAmount(Number(data.amount));
       } else if (data?.status === "failed") {
         setStatus("failed");
       } else {
@@ -149,10 +154,22 @@ const DonationCallback = () => {
                   {config.message}
                 </p>
 
-                {transactionId && status === "success" && (
-                  <p className="text-xs text-muted-foreground mb-6">
-                    Transaction Reference: <span className="font-mono font-medium">{transactionId}</span>
-                  </p>
+                {status === "success" && (amount !== null || transactionId) && (
+                  <div className="rounded-lg border border-border/60 bg-background/60 p-4 mb-6 text-left space-y-2">
+                    <p className="text-sm font-semibold text-foreground text-center mb-2">Donation Receipt</p>
+                    {amount !== null && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Amount</span>
+                        <span className="font-semibold text-foreground">{formatAmount(amount)} <span className="text-xs text-muted-foreground">({currency})</span></span>
+                      </div>
+                    )}
+                    {transactionId && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Reference</span>
+                        <span className="font-mono font-medium text-foreground">{transactionId}</span>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
