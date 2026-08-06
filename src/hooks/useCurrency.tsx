@@ -1,31 +1,33 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
+import {
+  BASE_CURRENCY,
+  currencies,
+  currencySymbol,
+  convertAmount,
+  formatCurrency,
+  isCurrencyCode,
+  type CurrencyCode,
+} from "@/lib/currency";
 
-export type CurrencyCode = "EUR" | "USD" | "GBP" | "UGX";
-
-interface CurrencyInfo {
-  code: CurrencyCode;
-  symbol: string;
-  label: string;
-  rate: number; // rate relative to EUR (base)
-}
-
-export const currencies: Record<CurrencyCode, CurrencyInfo> = {
-  EUR: { code: "EUR", symbol: "\u20AC", label: "Euro", rate: 1 },
-  USD: { code: "USD", symbol: "$", label: "US Dollar", rate: 1.08 },
-  GBP: { code: "GBP", symbol: "\u00A3", label: "Pound Sterling", rate: 0.86 },
-  UGX: { code: "UGX", symbol: "UGX", label: "Ugandan Shilling", rate: 4050 },
-};
+export { currencies, currencyOptions, BASE_CURRENCY } from "@/lib/currency";
+export type { CurrencyCode } from "@/lib/currency";
 
 interface CurrencyContextType {
   currency: CurrencyCode;
+  symbol: string;
   setCurrency: (code: CurrencyCode) => void;
-  formatAmount: (amountInEur: number) => string;
+  /** Format a base-currency (EUR) amount in the selected currency. */
+  formatAmount: (amountInBase: number) => string;
+  /** Convert a base-currency (EUR) amount into the selected currency. */
+  convert: (amountInBase: number) => number;
 }
 
 const CurrencyContext = createContext<CurrencyContextType>({
-  currency: "EUR",
+  currency: BASE_CURRENCY,
+  symbol: currencySymbol(BASE_CURRENCY),
   setCurrency: () => {},
-  formatAmount: (amount) => `\u20AC${amount.toLocaleString()}`,
+  formatAmount: (amount) => formatCurrency(amount, BASE_CURRENCY),
+  convert: (amount) => convertAmount(amount, BASE_CURRENCY),
 });
 
 export const useCurrency = () => useContext(CurrencyContext);
@@ -33,7 +35,7 @@ export const useCurrency = () => useContext(CurrencyContext);
 export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currency, setCurrency] = useState<CurrencyCode>(() => {
     const saved = localStorage.getItem("preferred-currency");
-    return (saved as CurrencyCode) || "EUR";
+    return isCurrencyCode(saved) ? saved : BASE_CURRENCY;
   });
 
   const handleSetCurrency = useCallback((code: CurrencyCode) => {
@@ -41,21 +43,19 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem("preferred-currency", code);
   }, []);
 
-  const formatAmount = useCallback(
-    (amountInEur: number) => {
-      const info = currencies[currency];
-      const converted = Math.round(amountInEur * info.rate);
-      if (currency === "UGX") {
-        return `UGX ${converted.toLocaleString()}`;
-      }
-      return `${info.symbol}${converted.toLocaleString()}`;
-    },
-    [currency]
+  const formatAmount = useCallback((amountInBase: number) => formatCurrency(amountInBase, currency), [currency]);
+  const convert = useCallback((amountInBase: number) => convertAmount(amountInBase, currency), [currency]);
+
+  const value = useMemo(
+    () => ({
+      currency,
+      symbol: currencySymbol(currency),
+      setCurrency: handleSetCurrency,
+      formatAmount,
+      convert,
+    }),
+    [currency, handleSetCurrency, formatAmount, convert]
   );
 
-  return (
-    <CurrencyContext.Provider value={{ currency, setCurrency: handleSetCurrency, formatAmount }}>
-      {children}
-    </CurrencyContext.Provider>
-  );
+  return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;
 };
