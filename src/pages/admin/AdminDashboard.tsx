@@ -189,8 +189,8 @@ const AdminDashboard = () => {
                   <LineChart data={monthlyData}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                     <XAxis dataKey="month" className="text-xs" />
-                    <YAxis className="text-xs" />
-                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <YAxis className="text-xs" tickFormatter={(v: number) => formatAmount(Number(v))} width={80} />
+                    <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatAmount(Number(value))} />} />
                     <Line type="monotone" dataKey="amount" stroke="var(--color-amount)" strokeWidth={2} dot={{ r: 3 }} />
                   </LineChart>
                 </ChartContainer>
