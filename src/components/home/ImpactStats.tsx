@@ -49,9 +49,12 @@ const CounterCard = ({ icon: Icon, label, value, prefix, suffix, format }: typeo
   }, [isVisible, value]);
 
   return (
-    <div ref={ref} className="text-center p-6">
-      <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent/10 flex items-center justify-center">
-        <Icon className="w-7 h-7 text-accent" />
+    <div
+      ref={ref}
+      className="rounded-3xl bg-card border border-border p-7 shadow-card transition-all duration-300 hover:shadow-elevated hover:-translate-y-1 md:even:mt-8"
+    >
+      <div className="w-12 h-12 mb-6 rounded-2xl bg-accent/10 flex items-center justify-center">
+        <Icon className="w-6 h-6 text-accent" />
       </div>
       <div className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-1">
         {prefix}{formatNumber(count, format)}{suffix}
@@ -63,17 +66,25 @@ const CounterCard = ({ icon: Icon, label, value, prefix, suffix, format }: typeo
 
 const ImpactStats = () => {
   return (
-    <section className="py-16 md:py-24 bg-secondary/50">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Our Impact in Numbers
+    <section className="relative py-20 md:py-28 bg-secondary/60 overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-24 -right-24 w-[26rem] h-[26rem] rounded-full bg-charity-gold/20 blur-3xl"
+      />
+      <div className="container mx-auto px-4 relative">
+        <div className="max-w-2xl mb-14">
+          <span className="text-accent font-bold tracking-[0.2em] uppercase text-xs">
+            Measured, transparent, accountable
+          </span>
+          <h2 className="font-serif text-3xl md:text-5xl font-medium text-foreground mt-4 mb-5 leading-tight">
+            Our impact, in <span className="italic text-charity-orange-light">numbers</span>.
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Every donation, every volunteer hour, every act of kindness adds up to create meaningful change.
+          <p className="text-muted-foreground text-lg leading-relaxed">
+            Every donation, every volunteer hour, every act of kindness adds up to create meaningful
+            change in the communities we serve.
           </p>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {stats.map((stat) => (
             <CounterCard key={stat.label} {...stat} />
           ))}
