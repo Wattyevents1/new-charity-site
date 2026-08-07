@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ["Lora", "Georgia", "serif"],
-        sans: ["'Nunito Sans'", "system-ui", "sans-serif"],
+        serif: ["'Playfair Display'", "Georgia", "serif"],
+        sans: ["'DM Sans'", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
