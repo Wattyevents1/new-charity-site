@@ -74,11 +74,11 @@ const HeroSection = () => {
             ref={statsRef}
             className="reveal-on-scroll md:col-span-7 md:row-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4"
           >
-            <div className="rounded-3xl bg-charity-gold p-7 flex flex-col justify-between min-h-[160px]">
+            <div className="rounded-3xl bg-charity-gold p-7 flex flex-col justify-end gap-5 min-h-[160px]">
               <span className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <Users className="w-5 h-5 text-primary" />
               </span>
-              <span className="block mt-6">
+              <span className="block">
                 <span className="block font-serif text-4xl font-bold text-primary">50+</span>
                 <span className="block text-primary/80 font-semibold uppercase tracking-wider text-xs mt-1">
                   Active donors
@@ -86,11 +86,11 @@ const HeroSection = () => {
               </span>
             </div>
 
-            <div className="rounded-3xl bg-charity-orange-light p-7 flex flex-col justify-between min-h-[160px]">
+            <div className="rounded-3xl bg-charity-orange-light p-7 flex flex-col justify-end gap-5 min-h-[160px]">
               <span className="w-10 h-10 rounded-full bg-background/25 flex items-center justify-center">
                 <Building2 className="w-5 h-5 text-primary-foreground" />
               </span>
-              <span className="block mt-6">
+              <span className="block">
                 <span className="block font-serif text-4xl font-bold text-primary-foreground">50+</span>
                 <span className="block text-primary-foreground/90 font-semibold uppercase tracking-wider text-xs mt-1">
                   Projects delivered
@@ -98,11 +98,11 @@ const HeroSection = () => {
               </span>
             </div>
 
-            <div className="rounded-3xl bg-primary p-7 flex flex-col justify-between min-h-[160px]">
+            <div className="rounded-3xl bg-primary p-7 flex flex-col justify-end gap-5 min-h-[160px]">
               <span className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
                 <Globe2 className="w-5 h-5 text-charity-gold" />
               </span>
-              <span className="block mt-6">
+              <span className="block">
                 <span className="block font-serif text-4xl font-bold text-charity-gold">02</span>
                 <span className="block text-charity-gold/80 font-semibold uppercase tracking-wider text-xs mt-1">
                   Countries impacted
