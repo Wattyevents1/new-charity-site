@@ -1,16 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { AlertTriangle, Clock, Heart } from "lucide-react";
+import { AlertTriangle, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
-import { useProjectDonations } from "@/hooks/useProjectDonations";
-import { useCurrency } from "@/hooks/useCurrency";
 
 const UrgentAppeals = () => {
   const [appeal, setAppeal] = useState<any>(null);
-  const donationTotals = useProjectDonations();
-  const { formatAmount } = useCurrency();
 
   useEffect(() => {
     const fetch = async () => {
@@ -29,10 +24,6 @@ const UrgentAppeals = () => {
 
   if (!appeal) return null;
 
-  const goal = appeal.funding_goal || 1;
-  const donated = donationTotals[appeal.id];
-  const raised = donated ? donated.total_amount : (appeal.amount_raised || 0);
-  const percentage = Math.min(Math.round((raised / goal) * 100), 100);
 
   return (
     <section className="py-16 md:py-24 bg-primary text-primary-foreground relative overflow-hidden">
@@ -55,16 +46,6 @@ const UrgentAppeals = () => {
             {appeal.description}
           </p>
 
-          <div className="max-w-md mx-auto mb-8">
-            <div className="flex justify-between text-sm mb-2">
-               <span className="font-semibold">{formatAmount(raised)} raised</span>
-               <span className="text-primary-foreground/70">Goal: {formatAmount(goal)}</span>
-            </div>
-            <Progress value={percentage} className="h-3 bg-primary-foreground/20" />
-            <div className="flex justify-between items-center mt-2">
-              <span className="text-sm text-primary-foreground/70">{percentage}% complete</span>
-            </div>
-          </div>
 
           <Link to="/urgent-appeals">
             <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-10 py-6 text-lg rounded-full shadow-warm">

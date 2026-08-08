@@ -5,11 +5,8 @@ import { AlertTriangle, Clock, Heart, MapPin } from "lucide-react";
 import LogoSpinner from "@/components/ui/LogoSpinner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useProjectDonations } from "@/hooks/useProjectDonations";
-import { useCurrency } from "@/hooks/useCurrency";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects">;
@@ -17,8 +14,7 @@ type Project = Tables<"projects">;
 const UrgentAppealsPage = () => {
   const [appeals, setAppeals] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const donationTotals = useProjectDonations();
-  const { formatAmount } = useCurrency();
+
 
   useEffect(() => {
     const fetch = async () => {
@@ -58,10 +54,6 @@ const UrgentAppealsPage = () => {
           )}
           <div className="space-y-8 animate-fade-in">
             {appeals.map((appeal) => {
-              const goal = appeal.funding_goal || 1;
-              const donated = donationTotals[appeal.id];
-              const raised = donated ? donated.total_amount : (appeal.amount_raised || 0);
-              const percentage = Math.min(Math.round((raised / goal) * 100), 100);
               return (
                 <Card key={appeal.id} className="overflow-hidden border-border/50 shadow-card">
                   <div className="grid md:grid-cols-2">
@@ -72,13 +64,11 @@ const UrgentAppealsPage = () => {
                       {appeal.location && (
                         <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3"><MapPin className="w-3.5 h-3.5" /> {appeal.location}</div>
                       )}
-                      <p className="text-muted-foreground text-sm mb-6">{appeal.description}</p>
-                      <div className="space-y-2 mb-6">
-                        <div className="flex justify-between text-sm"><span className="font-semibold">{formatAmount(raised)}</span><span className="text-muted-foreground">of {formatAmount(goal)}</span></div>
-                        <Progress value={percentage} className="h-2.5" />
-                        <div className="flex justify-between items-center"><span className="text-xs text-muted-foreground">{percentage}% funded</span></div>
+                      <p className="text-muted-foreground text-sm mb-6 whitespace-pre-line">{appeal.long_description || appeal.description}</p>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <Link to={`/projects/${appeal.id}`}><Button variant="outline">Read more</Button></Link>
+                        <Link to={`/donate?project=${appeal.id}`}><Button className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"><Heart className="w-4 h-4 mr-2 fill-current" />Donate Now</Button></Link>
                       </div>
-                      <Link to="/donate"><Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"><Heart className="w-4 h-4 mr-2 fill-current" />Donate Now</Button></Link>
                     </CardContent>
                   </div>
                 </Card>
