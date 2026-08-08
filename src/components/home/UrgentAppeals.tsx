@@ -46,16 +46,6 @@ const UrgentAppeals = () => {
             {appeal.description}
           </p>
 
-          <div className="max-w-md mx-auto mb-8">
-            <div className="flex justify-between text-sm mb-2">
-               <span className="font-semibold">{formatAmount(raised)} raised</span>
-               <span className="text-primary-foreground/70">Goal: {formatAmount(goal)}</span>
-            </div>
-            <Progress value={percentage} className="h-3 bg-primary-foreground/20" />
-            <div className="flex justify-between items-center mt-2">
-              <span className="text-sm text-primary-foreground/70">{percentage}% complete</span>
-            </div>
-          </div>
 
           <Link to="/urgent-appeals">
             <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-10 py-6 text-lg rounded-full shadow-warm">
