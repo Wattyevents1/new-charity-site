@@ -90,11 +90,6 @@ const FeaturedProjects = () => {
               </Card>
             );
           })}
-
-                </CardContent>
-              </Card>
-            );
-          })}
         </div>
       </div>
     </section>
