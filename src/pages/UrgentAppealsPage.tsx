@@ -78,12 +78,6 @@ const UrgentAppealsPage = () => {
                 </Card>
               );
             })}
-
-                    </CardContent>
-                  </div>
-                </Card>
-              );
-            })}
           </div>
         </div>
       </section>
