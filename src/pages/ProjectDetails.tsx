@@ -103,12 +103,9 @@ const ProjectDetails = () => {
               <Card className="sticky top-24 border-border/50 shadow-elevated">
                 <CardContent className="p-6">
                   <h3 className="font-serif text-xl font-bold mb-4">Support This Project</h3>
-                  <div className="space-y-3 mb-6">
-                    <div className="flex justify-between text-sm"><span className="font-semibold">{formatAmount(raised)}</span><span className="text-muted-foreground">of {formatAmount(goal)}</span></div>
-                    <Progress value={percentage} className="h-3" />
-                    <div className="flex justify-between text-xs text-muted-foreground"><span>{percentage}% funded</span><span>{donorsCount} donors</span></div>
-                  </div>
-                  <Link to="/donate"><Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-5 mb-3"><Heart className="w-4 h-4 mr-2 fill-current" />Donate Now</Button></Link>
+                  <p className="text-sm text-muted-foreground mb-6">Your donation supports this project directly. Every contribution counts.</p>
+                  <Link to={`/donate?project=${project.id}`}><Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-5 mb-3"><Heart className="w-4 h-4 mr-2 fill-current" />Donate Now</Button></Link>
+
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-muted-foreground text-center">Share this project</p>
                     <SocialShareButtons url={window.location.href} title={project.title} className="justify-center" />
