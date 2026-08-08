@@ -52,12 +52,9 @@ const ProjectDetails = () => {
     );
   }
 
-  const goal = project.funding_goal || 1;
-  const donated = donationTotals[project.id];
-  const raised = donated ? donated.total_amount : (project.amount_raised || 0);
-  const donorsCount = donated ? donated.donors_count : (project.donors_count || 0);
-  const percentage = Math.min(Math.round((raised / goal) * 100), 100);
+  const donorsCount = project.donors_count || 0;
   const galleryUrls = Array.isArray(project.gallery_urls) ? (project.gallery_urls as string[]) : [];
+
 
   return (
     <Layout>
