@@ -3,18 +3,13 @@ import { Link } from "react-router-dom";
 import { ArrowRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
-import { useProjectDonations } from "@/hooks/useProjectDonations";
-import { useCurrency } from "@/hooks/useCurrency";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects">;
 
 const FeaturedProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
-  const donationTotals = useProjectDonations();
-  const { formatAmount } = useCurrency();
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -28,6 +23,7 @@ const FeaturedProjects = () => {
     };
     fetchProjects();
   }, []);
+
 
   return (
     <section className="py-16 md:py-24 bg-[hsl(42,80%,92%)]">
