@@ -5,11 +5,8 @@ import { AlertTriangle, Clock, Heart, MapPin } from "lucide-react";
 import LogoSpinner from "@/components/ui/LogoSpinner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useProjectDonations } from "@/hooks/useProjectDonations";
-import { useCurrency } from "@/hooks/useCurrency";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects">;
@@ -17,8 +14,7 @@ type Project = Tables<"projects">;
 const UrgentAppealsPage = () => {
   const [appeals, setAppeals] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const donationTotals = useProjectDonations();
-  const { formatAmount } = useCurrency();
+
 
   useEffect(() => {
     const fetch = async () => {

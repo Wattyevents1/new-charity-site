@@ -5,11 +5,8 @@ import { MapPin, Heart, Users, Calendar, ArrowLeft } from "lucide-react";
 import SocialShareButtons from "@/components/ui/SocialShareButtons";
 import LogoSpinner from "@/components/ui/LogoSpinner";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { useProjectDonations } from "@/hooks/useProjectDonations";
-import { useCurrency } from "@/hooks/useCurrency";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects">;
@@ -18,8 +15,7 @@ const ProjectDetails = () => {
   const { id } = useParams();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
-  const donationTotals = useProjectDonations();
-  const { formatAmount } = useCurrency();
+
 
   useEffect(() => {
     const fetchProject = async () => {
