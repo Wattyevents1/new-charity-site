@@ -98,7 +98,7 @@ const Footer = () => {
             © {new Date().getFullYear()} Al-Imran Muslim Aid. All rights reserved.
           </p>
           <p className="text-sm text-primary-foreground/60">
-            Made with <Heart className="w-3 h-3 inline fill-current text-charity-orange" /> for a better world
+            Made with <Heart className="w-3 h-3 inline fill-current text-charity-orange" /> &nbsp;by Watty Eventice
           </p>
         </div>
       </div>
