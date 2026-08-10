@@ -8,6 +8,7 @@ import { CurrencyProvider } from "@/hooks/useCurrency";
 import ProtectedRoute from "@/components/admin/ProtectedRoute";
 import ScrollToTop from "@/components/ScrollToTop";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Projects from "./pages/Projects";
@@ -83,6 +84,7 @@ const App = () => (
       </AuthProvider>
       </CurrencyProvider>
       <Analytics />
+      <SpeedInsights />
     </TooltipProvider>
   </QueryClientProvider>
 );
