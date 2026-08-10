@@ -84,6 +84,7 @@ const App = () => (
       </AuthProvider>
       </CurrencyProvider>
       <Analytics />
+      <SpeedInsights />
     </TooltipProvider>
   </QueryClientProvider>
 );
