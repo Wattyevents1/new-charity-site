@@ -49,6 +49,7 @@ const App = () => (
       <AuthProvider>
         <BrowserRouter>
           <ScrollToTop />
+          <AnalyticsRouteTracker />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
