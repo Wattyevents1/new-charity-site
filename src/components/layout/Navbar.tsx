@@ -85,12 +85,9 @@ const Navbar = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
-
-
-
-
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
+
       <nav className="container mx-auto px-4 flex items-center justify-between h-16 md:h-20">
         <Link to="/" className="flex items-center gap-2">
           <img src={logo} alt="Al-Imran Muslim Aid" className="w-10 h-10 rounded-full object-cover" />
