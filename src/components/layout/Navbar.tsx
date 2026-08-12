@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import CurrencySelector from "@/components/layout/CurrencySelector";
 import logo from "@/assets/logo.jpg";
 
+
 const navLinks = [
   { label: "Home", path: "/" },
   { label: "About", path: "/about" },
@@ -24,6 +25,14 @@ const Navbar = () => {
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname, location.search, location.key]);
+
+  // Close the mobile menu when the user starts scrolling the page.
+  useEffect(() => {
+    const handleScroll = () => setIsOpen(false);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
 
 
   return (
