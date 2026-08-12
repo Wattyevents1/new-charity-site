@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import LiveRegion from "@/components/a11y/LiveRegion";
 import { validateDonationForm, sanitize, MAX_LENGTHS, isValidEmail, type ValidationError } from "@/lib/validation";
 import { extractFunctionError } from "@/lib/functionError";
 import { useCurrency } from "@/hooks/useCurrency";
@@ -28,6 +29,7 @@ const DonateFunds = () => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("pesapal");
   const [errors, setErrors] = useState<ValidationError>({});
+  const [statusMessage, setStatusMessage] = useState("");
 
   const handlePresetClick = (preset: number) => { setSelectedPreset(preset); setAmount(preset); };
   const handleCustomAmount = (value: string) => { setSelectedPreset(null); setAmount(value ? parseInt(value) : ""); };
@@ -38,6 +40,7 @@ const DonateFunds = () => {
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) {
       toast.error("Please fix the errors below.");
+      setStatusMessage("There are errors in the donation form. Please review the highlighted fields.");
       return false;
     }
     return true;
@@ -49,6 +52,7 @@ const DonateFunds = () => {
   const handlePesapalPayment = async () => {
     if (!validateForm()) return;
     setLoading(true);
+    setStatusMessage(`Processing your ${formatAmount(Number(amount) || 0)} donation with Pesapal. Please wait.`);
     try {
       const { data, error } = await supabase.functions.invoke("pesapal-payment", {
         body: {
@@ -66,6 +70,7 @@ const DonateFunds = () => {
         throw new Error(msg);
       }
       if (data?.redirect_url) {
+        setStatusMessage("Donation confirmed. Redirecting you to the secure payment page.");
         window.location.href = data.redirect_url;
       } else {
         throw new Error("No redirect URL received");
@@ -73,6 +78,7 @@ const DonateFunds = () => {
     } catch (err: any) {
       console.error("Payment error:", err);
       toast.error(err.message || "Payment failed. Please try again.");
+      setStatusMessage(err.message || "Payment failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -81,6 +87,7 @@ const DonateFunds = () => {
   const handlePayPalPayment = async () => {
     if (!validateForm()) return;
     setLoading(true);
+    setStatusMessage(`Processing your ${formatAmount(Number(amount) || 0)} donation with PayPal. Please wait.`);
     try {
       const { data: createData, error: createError } = await supabase.functions.invoke("paypal-payment", {
         body: {
@@ -100,10 +107,12 @@ const DonateFunds = () => {
       }
       if (!createData?.redirect_url) throw new Error("Failed to create PayPal order");
 
+      setStatusMessage("Donation confirmed. Redirecting you to PayPal to complete your payment.");
       window.location.href = createData.redirect_url;
     } catch (err: any) {
       console.error("PayPal payment error:", err);
       toast.error(err.message || "Payment failed. Please try again.");
+      setStatusMessage(err.message || "Payment failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -111,6 +120,11 @@ const DonateFunds = () => {
 
   return (
     <Layout>
+      <LiveRegion
+        message={statusMessage}
+        politeness={loading ? "polite" : "assertive"}
+        role={loading ? "status" : "alert"}
+      />
       <SEO
         title="Donate Funds"
         description="Support Al-Imran Muslim Aid securely with PayPal or Pesapal. Every donation funds projects that uplift communities in Uganda and East Africa."
