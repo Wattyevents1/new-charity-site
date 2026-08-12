@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { extractFunctionError } from "@/lib/functionError";
 import { useCurrency } from "@/hooks/useCurrency";
+import LiveRegion from "@/components/a11y/LiveRegion";
 
 type DonationStatus = "success" | "failed" | "cancelled" | "pending" | "loading";
 
@@ -137,11 +138,28 @@ const DonationCallback = () => {
   const config = statusConfig[status];
   const Icon = config.icon;
 
+  const receiptAnnouncement =
+    status === "success" && (amount !== null || transactionId)
+      ? ` Donation receipt generated.${amount !== null ? ` Amount ${formatAmount(amount)} ${currency}.` : ""}${
+          transactionId ? ` Reference ${transactionId}.` : ""
+        }`
+      : "";
+
+  const announcement =
+    status === "loading"
+      ? "Verifying your payment, please wait."
+      : `${config.title.replace(/[^\p{L}\p{N}\s.,!?'-]/gu, "").trim()}. ${config.message}${receiptAnnouncement}`;
+
   return (
     <Layout>
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4">
           <div className="max-w-lg mx-auto">
+            <LiveRegion
+              message={announcement}
+              politeness={status === "failed" ? "assertive" : "polite"}
+              role={status === "failed" ? "alert" : "status"}
+            />
             <Card className={`border-border/50 shadow-elevated ${config.bgColor}`}>
               <CardContent className="p-8 md:p-12 text-center">
                 <Icon
