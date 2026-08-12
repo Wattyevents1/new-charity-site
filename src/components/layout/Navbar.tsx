@@ -127,16 +127,26 @@ const Navbar = () => {
         </div>
 
         <button
+          ref={toggleRef}
           className="lg:hidden p-2 rounded-md hover:bg-muted"
           onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle menu"
+          aria-label={isOpen ? "Close menu" : "Open menu"}
+          aria-expanded={isOpen}
+          aria-controls={menuId}
         >
           {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </nav>
 
       {isOpen && (
-        <div className="lg:hidden border-t border-border bg-background animate-fade-in">
+        <div
+          id={menuId}
+          ref={menuRef}
+          role="dialog"
+          aria-label="Mobile navigation"
+          className="lg:hidden border-t border-border bg-background animate-fade-in"
+        >
+
           <div className="container mx-auto px-4 py-4 flex flex-col gap-1">
             {navLinks.map((link) => (
               <Link
