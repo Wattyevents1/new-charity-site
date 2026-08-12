@@ -26,6 +26,14 @@ const Navbar = () => {
     setIsOpen(false);
   }, [location.pathname, location.search, location.key]);
 
+  // Close the mobile menu when the user starts scrolling the page.
+  useEffect(() => {
+    const handleScroll = () => setIsOpen(false);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
