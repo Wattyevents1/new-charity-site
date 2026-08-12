@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import CurrencySelector from "@/components/layout/CurrencySelector";
 import logo from "@/assets/logo.jpg";
 
+
 const navLinks = [
   { label: "Home", path: "/" },
   { label: "About", path: "/about" },
