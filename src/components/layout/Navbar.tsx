@@ -23,8 +23,8 @@ const Navbar = () => {
   const toggleRef = useRef<HTMLButtonElement>(null);
   const menuId = "mobile-navigation-menu";
 
-
   // Fold up the mobile menu whenever navigation happens, including taps on the
+
   // link for the page you are already on.
   useEffect(() => {
     setIsOpen(false);
