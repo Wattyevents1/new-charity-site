@@ -169,8 +169,11 @@ const DonateFunds = () => {
                   <Label htmlFor="custom-amount" className="text-sm font-medium mb-2 block">Or enter a custom amount</Label>
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">{currencySymbol}</span>
-                    <Input id="custom-amount" type="number" placeholder="0.00" value={amount} onChange={(e) => handleCustomAmount(e.target.value)} className={currencySymbol.length > 1 ? "pl-14 text-lg h-12" : "pl-8 text-lg h-12"} min="1" max="1000000" />
+                    <Input id="custom-amount" type="number" placeholder="0.00" value={amount} onChange={(e) => handleCustomAmount(e.target.value)} className={currencySymbol.length > 1 ? "pl-14 text-lg h-12" : "pl-8 text-lg h-12"} min="0.01" step="0.01" max="1000000" />
                   </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Any amount is welcome — donate from as little as {formatAmount(1)}, or even less.
+                  </p>
                   {errors.amount && <p className="text-xs text-destructive mt-1">{errors.amount}</p>}
                 </div>
 
