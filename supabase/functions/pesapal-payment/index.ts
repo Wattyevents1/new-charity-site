@@ -250,7 +250,14 @@ serve(async (req) => {
       }
 
       // ── Submit order ──
-      const { amount, donor_name, donor_email, donor_phone, description, merchant_reference, callback_url, is_recurring, project_id } = body;
+      const { amount, donor_name, donor_email, donor_phone, description, merchant_reference, callback_url, is_recurring, project_id, currency, charge_amount } = body;
+
+      // Pesapal-supported currencies. Ugandan mobile money (MTN / Airtel) is only
+      // debited when the order is submitted in UGX.
+      const SUPPORTED_CURRENCIES = ["UGX", "KES", "TZS", "USD", "EUR", "GBP"];
+      const orderCurrency = SUPPORTED_CURRENCIES.includes(String(currency ?? "").toUpperCase())
+        ? String(currency).toUpperCase()
+        : "UGX";
 
       if (!donor_email || typeof donor_email !== "string" || !isValidEmail(donor_email)) {
         return new Response(
@@ -266,6 +273,15 @@ serve(async (req) => {
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
+
+      // Amount actually charged, expressed in the order currency.
+      const numericChargeAmount = Number(charge_amount);
+      const chargeAmount =
+        Number.isFinite(numericChargeAmount) && numericChargeAmount > 0
+          ? numericChargeAmount
+          : numericAmount;
+      // UGX has no minor units — Pesapal rejects decimals on shilling orders.
+      const pesapalAmount = orderCurrency === "UGX" ? Math.max(1, Math.round(chargeAmount)) : Number(chargeAmount.toFixed(2));
 
       if (project_id && !isValidUUID(project_id)) {
         return new Response(
@@ -299,8 +315,8 @@ serve(async (req) => {
 
       const orderPayload = {
         id: orderId,
-        currency: "USD",
-        amount: numericAmount,
+        currency: orderCurrency,
+        amount: pesapalAmount,
         description: safeDescription,
         callback_url: pesapalCallbackUrl,
         notification_id: ipnId,
@@ -324,7 +340,10 @@ serve(async (req) => {
 
       const orderData = await orderRes.json();
       if (!orderRes.ok || orderData.error) {
-        throw new Error("Payment processing failed. Please try again.");
+        const detail =
+          orderData?.error?.message || orderData?.error?.code || orderData?.message || `HTTP ${orderRes.status}`;
+        console.error("Pesapal SubmitOrderRequest failed:", JSON.stringify(orderData));
+        throw new Error(`Payment processing failed: ${detail}`);
       }
 
       // Save donation record

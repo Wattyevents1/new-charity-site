@@ -19,7 +19,7 @@ const presetAmounts = [1, 5, 10, 25, 50, 100];
 
 const DonateFunds = () => {
   const navigate = useNavigate();
-  const { symbol: currencySymbol, formatAmount } = useCurrency();
+  const { symbol: currencySymbol, formatAmount, currency, convert } = useCurrency();
   const [amount, setAmount] = useState<number | "">("");
   const [donationType, setDonationType] = useState<"one-time" | "monthly">("one-time");
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
@@ -62,6 +62,10 @@ const DonateFunds = () => {
       const { data, error } = await supabase.functions.invoke("pesapal-payment", {
         body: {
           amount,
+          // Charge in the currency the donor selected — Ugandan mobile money is
+          // only debited for UGX orders.
+          currency,
+          charge_amount: convert(Number(amount) || 0),
           donor_name: sanitize(donorName, MAX_LENGTHS.name),
           donor_email: sanitize(donorEmail, MAX_LENGTHS.email),
           donor_phone: sanitize(donorPhone, MAX_LENGTHS.phone),
@@ -209,6 +213,10 @@ const DonateFunds = () => {
                         <Smartphone className="w-8 h-8 text-primary/60" />
                       </div>
                       <p className="text-sm">Pay securely with Visa, Mastercard, MTN Mobile Money, or Airtel Money via Pesapal.</p>
+                      <p className="text-xs mt-2">
+                        Paying with MTN or Airtel Money? Select <span className="font-semibold">UGX</span> in the currency
+                        selector so the prompt debits your mobile money wallet.
+                      </p>
                     </TabsContent>
                     <TabsContent value="paypal" className="mt-4 text-center text-muted-foreground py-6">
                       <Globe className="w-8 h-8 mx-auto mb-2 text-primary/60" />
