@@ -62,6 +62,10 @@ const DonateFunds = () => {
       const { data, error } = await supabase.functions.invoke("pesapal-payment", {
         body: {
           amount,
+          // Charge in the currency the donor selected — Ugandan mobile money is
+          // only debited for UGX orders.
+          currency,
+          charge_amount: convert(Number(amount) || 0),
           donor_name: sanitize(donorName, MAX_LENGTHS.name),
           donor_email: sanitize(donorEmail, MAX_LENGTHS.email),
           donor_phone: sanitize(donorPhone, MAX_LENGTHS.phone),
