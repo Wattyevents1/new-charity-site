@@ -213,6 +213,10 @@ const DonateFunds = () => {
                         <Smartphone className="w-8 h-8 text-primary/60" />
                       </div>
                       <p className="text-sm">Pay securely with Visa, Mastercard, MTN Mobile Money, or Airtel Money via Pesapal.</p>
+                      <p className="text-xs mt-2">
+                        Paying with MTN or Airtel Money? Select <span className="font-semibold">UGX</span> in the currency
+                        selector so the prompt debits your mobile money wallet.
+                      </p>
                     </TabsContent>
                     <TabsContent value="paypal" className="mt-4 text-center text-muted-foreground py-6">
                       <Globe className="w-8 h-8 mx-auto mb-2 text-primary/60" />
