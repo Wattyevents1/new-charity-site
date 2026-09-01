@@ -117,6 +117,33 @@ function sanitizeString(str: string, maxLen: number): string {
   return str.replace(/[<>"'`;]/g, "").trim().slice(0, maxLen);
 }
 
+// ── Currency → UGX settlement conversion ──
+// Orders are charged in the currency the donor selected, then the charged
+// amount is converted to UGX (the settlement currency) for reporting.
+const UGX_FALLBACK_RATES: Record<string, number> = {
+  UGX: 1,
+  USD: 3800,
+  EUR: 4100,
+  GBP: 4800,
+  KES: 29,
+  TZS: 1.45,
+};
+
+async function getUgxRate(currency: string): Promise<number> {
+  const code = currency.toUpperCase();
+  if (code === "UGX") return 1;
+  try {
+    const res = await fetchWithTimeout(`https://open.er-api.com/v6/latest/${code}`, {}, 8000);
+    const data = await res.json();
+    const rate = Number(data?.rates?.UGX);
+    if (Number.isFinite(rate) && rate > 0) return rate;
+  } catch (e) {
+    console.error("UGX rate lookup failed:", e);
+  }
+  return UGX_FALLBACK_RATES[code] ?? 1;
+}
+
+
 async function sendNotification(type: string, data: Record<string, unknown>) {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
