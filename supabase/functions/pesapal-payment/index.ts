@@ -274,6 +274,15 @@ serve(async (req) => {
         );
       }
 
+      // Amount actually charged, expressed in the order currency.
+      const numericChargeAmount = Number(charge_amount);
+      const chargeAmount =
+        Number.isFinite(numericChargeAmount) && numericChargeAmount > 0
+          ? numericChargeAmount
+          : numericAmount;
+      // UGX has no minor units — Pesapal rejects decimals on shilling orders.
+      const pesapalAmount = orderCurrency === "UGX" ? Math.max(1, Math.round(chargeAmount)) : Number(chargeAmount.toFixed(2));
+
       if (project_id && !isValidUUID(project_id)) {
         return new Response(
           JSON.stringify({ error: "Invalid project ID format" }),
