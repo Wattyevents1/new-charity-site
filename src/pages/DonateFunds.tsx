@@ -15,7 +15,7 @@ import { validateDonationForm, sanitize, MAX_LENGTHS, isValidEmail, type Validat
 import { extractFunctionError } from "@/lib/functionError";
 import { useCurrency } from "@/hooks/useCurrency";
 
-const presetAmounts = [10, 25, 50, 100, 250, 500];
+const presetAmounts = [1, 5, 10, 25, 50, 100];
 
 const DonateFunds = () => {
   const navigate = useNavigate();
@@ -32,7 +32,12 @@ const DonateFunds = () => {
   const [statusMessage, setStatusMessage] = useState("");
 
   const handlePresetClick = (preset: number) => { setSelectedPreset(preset); setAmount(preset); };
-  const handleCustomAmount = (value: string) => { setSelectedPreset(null); setAmount(value ? parseInt(value) : ""); };
+  const handleCustomAmount = (value: string) => {
+    setSelectedPreset(null);
+    if (!value) return setAmount("");
+    const parsed = parseFloat(value);
+    setAmount(Number.isFinite(parsed) ? parsed : "");
+  };
 
   const validateForm = (): boolean => {
     const validationErrors = validateDonationForm({ donor_email: donorEmail, amount });
