@@ -315,8 +315,8 @@ serve(async (req) => {
 
       const orderPayload = {
         id: orderId,
-        currency: "USD",
-        amount: numericAmount,
+        currency: orderCurrency,
+        amount: pesapalAmount,
         description: safeDescription,
         callback_url: pesapalCallbackUrl,
         notification_id: ipnId,
