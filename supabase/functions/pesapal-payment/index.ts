@@ -250,7 +250,14 @@ serve(async (req) => {
       }
 
       // ── Submit order ──
-      const { amount, donor_name, donor_email, donor_phone, description, merchant_reference, callback_url, is_recurring, project_id } = body;
+      const { amount, donor_name, donor_email, donor_phone, description, merchant_reference, callback_url, is_recurring, project_id, currency, charge_amount } = body;
+
+      // Pesapal-supported currencies. Ugandan mobile money (MTN / Airtel) is only
+      // debited when the order is submitted in UGX.
+      const SUPPORTED_CURRENCIES = ["UGX", "KES", "TZS", "USD", "EUR", "GBP"];
+      const orderCurrency = SUPPORTED_CURRENCIES.includes(String(currency ?? "").toUpperCase())
+        ? String(currency).toUpperCase()
+        : "UGX";
 
       if (!donor_email || typeof donor_email !== "string" || !isValidEmail(donor_email)) {
         return new Response(
