@@ -340,7 +340,10 @@ serve(async (req) => {
 
       const orderData = await orderRes.json();
       if (!orderRes.ok || orderData.error) {
-        throw new Error("Payment processing failed. Please try again.");
+        const detail =
+          orderData?.error?.message || orderData?.error?.code || orderData?.message || `HTTP ${orderRes.status}`;
+        console.error("Pesapal SubmitOrderRequest failed:", JSON.stringify(orderData));
+        throw new Error(`Payment processing failed: ${detail}`);
       }
 
       // Save donation record
