@@ -128,7 +128,10 @@ export type Database = {
       donations: {
         Row: {
           amount: number
+          amount_ugx: number | null
+          charged_amount: number | null
           created_at: string
+          currency: string
           donor_email: string | null
           donor_name: string | null
           id: string
@@ -137,10 +140,14 @@ export type Database = {
           project_id: string | null
           status: string | null
           transaction_id: string | null
+          ugx_rate: number | null
         }
         Insert: {
           amount: number
+          amount_ugx?: number | null
+          charged_amount?: number | null
           created_at?: string
+          currency?: string
           donor_email?: string | null
           donor_name?: string | null
           id?: string
@@ -149,10 +156,14 @@ export type Database = {
           project_id?: string | null
           status?: string | null
           transaction_id?: string | null
+          ugx_rate?: number | null
         }
         Update: {
           amount?: number
+          amount_ugx?: number | null
+          charged_amount?: number | null
           created_at?: string
+          currency?: string
           donor_email?: string | null
           donor_name?: string | null
           id?: string
@@ -161,6 +172,7 @@ export type Database = {
           project_id?: string | null
           status?: string | null
           transaction_id?: string | null
+          ugx_rate?: number | null
         }
         Relationships: [
           {
