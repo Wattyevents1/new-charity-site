@@ -378,8 +378,16 @@ serve(async (req) => {
       const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
       const supabase = createClient(supabaseUrl, supabaseKey);
 
+      // Convert the charged amount into UGX for settlement/reporting
+      const ugxRate = await getUgxRate(orderCurrency);
+      const amountUgx = Math.round(pesapalAmount * ugxRate);
+
       await supabase.from("donations").insert({
         amount: numericAmount,
+        currency: orderCurrency,
+        charged_amount: pesapalAmount,
+        amount_ugx: amountUgx,
+        ugx_rate: ugxRate,
         donor_name: safeDonorName,
         donor_email: donor_email.trim(),
         payment_method: "pesapal",
@@ -388,6 +396,7 @@ serve(async (req) => {
         transaction_id: orderId,
         project_id: project_id || null,
       });
+
 
       return new Response(
         JSON.stringify({
