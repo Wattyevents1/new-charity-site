@@ -59,3 +59,13 @@ export function donationStatusBadgeClass(status: string | null | undefined): str
 export function donationStatusLabel(status: string | null | undefined): string {
   return DONATION_STATUS_LABELS[categorizeDonationStatus(status)];
 }
+
+/** Solid dot color per category, for status legend/summary chips. */
+export const DONATION_STATUS_DOT_CLASSES: Record<DonationStatusCategory, string> = {
+  successful: "bg-charity-green-light",
+  approved: "bg-charity-orange",
+  pending: "bg-charity-gold",
+  unsuccessful: "bg-destructive",
+  refunded: "bg-muted-foreground",
+  unknown: "bg-muted-foreground",
+};
