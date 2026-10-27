@@ -23,6 +23,7 @@ import {
 } from "recharts";
 import { Heart, Users, FolderKanban, Mail, FileText, Package, Crown, Repeat } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
+import { categorizeDonationStatus, donationStatusBadgeClass, donationStatusLabel, DONATION_STATUS_LABELS, DONATION_STATUS_DOT_CLASSES } from "@/lib/donationStatus";
 import LogoSpinner from "@/components/ui/LogoSpinner";
 
 interface RecentDonation {
@@ -56,6 +57,7 @@ const AdminDashboard = () => {
   const [monthlyData, setMonthlyData] = useState<{ month: string; amount: number }[]>([]);
   const [progressData, setProgressData] = useState<ProjectProgress[]>([]);
   const [recentDonations, setRecentDonations] = useState<RecentDonation[]>([]);
+  const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const { formatAmount } = useCurrency();
 
@@ -96,6 +98,14 @@ const AdminDashboard = () => {
         }
       });
       setMonthlyData(months);
+
+      // Status breakdown (successful / approved / pending / unsuccessful / refunded)
+      const counts: Record<string, number> = { successful: 0, approved: 0, pending: 0, unsuccessful: 0, refunded: 0 };
+      allDonations.forEach((d) => {
+        const cat = categorizeDonationStatus(d.status);
+        counts[cat] = (counts[cat] || 0) + 1;
+      });
+      setStatusCounts(counts);
 
       // Project progress (top 5 by progress)
       const projects = projectsRes.data || [];
@@ -174,6 +184,31 @@ const AdminDashboard = () => {
               </Card>
             ))}
           </div>
+
+          {/* Transaction status breakdown */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="font-serif text-lg">Transaction Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {(["successful", "approved", "pending", "unsuccessful"] as const).map((cat) => (
+                  <div key={cat} className="rounded-lg border border-border/50 p-3">
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-block h-2.5 w-2.5 rounded-full ${DONATION_STATUS_DOT_CLASSES[cat]}`} />
+                      <span className="text-xs font-medium text-muted-foreground">{DONATION_STATUS_LABELS[cat]}</span>
+                    </div>
+                    <p className="font-serif text-2xl font-bold mt-1">{statusCounts[cat] ?? 0}</p>
+                  </div>
+                ))}
+              </div>
+              {(statusCounts.refunded ?? 0) > 0 && (
+                <p className="text-xs text-muted-foreground mt-3">
+                  {DONATION_STATUS_LABELS.refunded}: {statusCounts.refunded}
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Charts */}
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
@@ -264,14 +299,8 @@ const AdminDashboard = () => {
                             {formatAmount(Number(d.amount) || 0)}
                           </TableCell>
                           <TableCell>
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                              d.status === "completed"
-                                ? "bg-charity-green-light/20 text-charity-green-light"
-                                : d.status === "pending"
-                                ? "bg-charity-gold/20 text-charity-gold"
-                                : "bg-muted text-muted-foreground"
-                            }`}>
-                              {d.status || "unknown"}
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${donationStatusBadgeClass(d.status)}`}>
+                              {donationStatusLabel(d.status)}
                             </span>
                           </TableCell>
                         </TableRow>
