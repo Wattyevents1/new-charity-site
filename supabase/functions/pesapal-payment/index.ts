@@ -271,6 +271,12 @@ serve(async (req) => {
             status: mappedStatus,
             transaction_id: statusData.payment_account || merchant_reference,
             amount: donationAmount,
+            pesapal_status: statusData.payment_status_description ?? null,
+            pesapal_status_code: statusData.status_code ?? null,
+            pesapal_description: statusData.description ?? null,
+            pesapal_message: statusData.message ?? null,
+            pesapal_error: statusData.error ?? null,
+            payment_method: statusData.payment_method ?? null,
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
