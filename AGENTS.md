@@ -1,0 +1,2 @@
+# Architecture rules
+- Use a shared Turnstile frontend hook and edge verification module for public submissions; verify each token exactly once before side effects and leave payment reconciliation unchallenged.
