@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { verifyTurnstile } from "../_shared/turnstile.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -76,6 +77,11 @@ serve(async (req) => {
 
     // ── Create Order ──
     if (action === "create-order") {
+      if (!await verifyTurnstile(body.turnstile_token, "donation_paypal")) {
+        return new Response(JSON.stringify({ error: "Security verification failed or expired. Please retry verification." }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       const { amount, donor_name, donor_email, donor_phone, description, is_recurring, project_id, callback_url } = body;
 
       if (!donor_email || typeof donor_email !== "string" || !isValidEmail(donor_email)) {

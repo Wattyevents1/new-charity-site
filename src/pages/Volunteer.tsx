@@ -1,3 +1,4 @@
+import { useTurnstile } from "@/hooks/useTurnstile";
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import SEO from "@/components/SEO";
@@ -30,6 +31,7 @@ const Volunteer = () => {
   const [skills, setSkills] = useState("");
   const [availability, setAvailability] = useState("");
   const [loading, setLoading] = useState(false);
+  const verification = useTurnstile("submit_volunteer");
   const [errors, setErrors] = useState<ValidationError>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,11 +42,16 @@ const Volunteer = () => {
       toast.error("Please fix the errors below.");
       return;
     }
+    if (loading || !verification.token) {
+      toast.error("Please complete security verification.");
+      return;
+    }
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("public-forms", {
         body: {
           action: "submit_volunteer",
+          turnstile_token: verification.token,
           data: {
             name: sanitize(name, MAX_LENGTHS.name),
             email: sanitize(email, MAX_LENGTHS.email),
@@ -62,6 +69,7 @@ const Volunteer = () => {
     } catch (err: any) {
       toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
+      verification.reset();
       setLoading(false);
     }
   };
@@ -157,7 +165,8 @@ const Volunteer = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-5" disabled={loading}>
+                  {verification.widget}
+                    <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-5" disabled={loading || !verification.token}>
                     {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting...</> : "Submit Application"}
                   </Button>
                 </form>

@@ -1,3 +1,4 @@
+declare const Deno: { env: { get(name: string): string | undefined } };
 export interface VerificationResult { success?: boolean; action?: string; hostname?: string }
 export const FRONTEND_HOSTNAMES = new Set([
   "al-imran-muslim-aid.lovable.app",

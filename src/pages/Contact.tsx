@@ -1,3 +1,4 @@
+import { useTurnstile } from "@/hooks/useTurnstile";
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Mail, Phone, MapPin, Clock, Loader2 } from "lucide-react";
@@ -32,6 +33,7 @@ const Contact = () => {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const verification = useTurnstile("submit_contact");
   const [errors, setErrors] = useState<ValidationError>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,11 +44,16 @@ const Contact = () => {
       toast.error("Please fix the errors below.");
       return;
     }
+    if (loading || !verification.token) {
+      toast.error("Please complete security verification.");
+      return;
+    }
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("public-forms", {
         body: {
           action: "submit_contact",
+          turnstile_token: verification.token,
           data: {
             name: sanitize(name, MAX_LENGTHS.name),
             email: sanitize(email, MAX_LENGTHS.email),
@@ -62,6 +69,7 @@ const Contact = () => {
     } catch (err: any) {
       toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
+      verification.reset();
       setLoading(false);
     }
   };
@@ -123,7 +131,8 @@ const Contact = () => {
                         <p className="text-xs text-muted-foreground ml-auto">{message.length}/{MAX_LENGTHS.message}</p>
                       </div>
                     </div>
-                    <Button type="submit" className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8" disabled={loading}>
+                    {verification.widget}
+                    <Button type="submit" className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8" disabled={loading || !verification.token}>
                       {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Sending...</> : "Send Message"}
                     </Button>
                   </form>
