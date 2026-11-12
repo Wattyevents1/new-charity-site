@@ -32,6 +32,7 @@ describe("Turnstile submission verification", () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
   it("verifies once per request and rejects Cloudflare replay responses", async () => {
+    vi.stubGlobal("AbortSignal", { timeout: () => new AbortController().signal });
     vi.stubGlobal("Deno", { env: { get: () => "test-secret" } });
     const fetcher = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify(result)))
