@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { verifyTurnstile } from "../_shared/turnstile.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -283,6 +284,17 @@ serve(async (req) => {
       }
 
       // ── Submit order ──
+      const membershipTier = body.membership_tier;
+      if (membershipTier !== undefined && !["supporter", "partner", "champion"].includes(membershipTier)) {
+        return new Response(JSON.stringify({ error: "Invalid membership tier" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!await verifyTurnstile(body.turnstile_token, membershipTier ? "membership_payment" : "donation_pesapal")) {
+        return new Response(JSON.stringify({ error: "Security verification failed or expired. Please retry verification." }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       const { amount, donor_name, donor_email, donor_phone, description, merchant_reference, callback_url, is_recurring, project_id, currency, charge_amount } = body;
 
       // Pesapal-supported currencies. Ugandan mobile money (MTN / Airtel) is only
@@ -385,6 +397,14 @@ serve(async (req) => {
       const supabase = createClient(supabaseUrl, supabaseKey);
 
       // Convert the charged amount into UGX for settlement/reporting
+      if (membershipTier) {
+        const { error: membershipError } = await supabase.from("memberships").insert({
+          donor_email: donor_email.trim(), donor_name: safeDonorName,
+          tier: membershipTier, status: "pending",
+        });
+        if (membershipError) throw new Error("Unable to save membership. Please try again.");
+        sendNotification("membership", { donor_email: donor_email.trim(), donor_name: safeDonorName, tier: membershipTier });
+      }
       const ugxRate = await getUgxRate(orderCurrency);
       const amountUgx = Math.round(pesapalAmount * ugxRate);
 

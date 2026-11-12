@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { verifyTurnstile } from "../_shared/turnstile.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,6 +44,11 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
     const { action, data } = body;
+
+    const protectedActions = ["submit_volunteer", "submit_contact", "submit_item_donation", "submit_membership"];
+    if (protectedActions.includes(action) && !await verifyTurnstile(body.turnstile_token, action)) {
+      return err(403, "Security verification failed or expired. Please retry verification.");
+    }
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
