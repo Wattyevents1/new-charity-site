@@ -1,3 +1,4 @@
+import { useTurnstile } from "@/hooks/useTurnstile";
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import SEO from "@/components/SEO";
@@ -23,6 +24,7 @@ const DonateItems = () => {
   const [itemDescription, setItemDescription] = useState("");
   const [pickupLocation, setPickupLocation] = useState("");
   const [loading, setLoading] = useState(false);
+  const verification = useTurnstile("submit_item_donation");
   const [errors, setErrors] = useState<ValidationError>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,11 +35,16 @@ const DonateItems = () => {
       toast.error("Please fix the errors below.");
       return;
     }
+    if (loading || !verification.token) {
+      toast.error("Please complete security verification.");
+      return;
+    }
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("public-forms", {
         body: {
           action: "submit_item_donation",
+          turnstile_token: verification.token,
           data: {
             donor_name: sanitize(donorName, MAX_LENGTHS.name),
             donor_email: sanitize(donorEmail, MAX_LENGTHS.email),
@@ -55,6 +62,7 @@ const DonateItems = () => {
     } catch (err: any) {
       toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
+      verification.reset();
       setLoading(false);
     }
   };
@@ -133,7 +141,8 @@ const DonateItems = () => {
                   <Label htmlFor="item-location">Pickup / Drop-off Location</Label>
                   <Input id="item-location" placeholder="Address for pickup or drop-off" className="mt-1" value={pickupLocation} onChange={(e) => setPickupLocation(e.target.value)} maxLength={MAX_LENGTHS.location} />
                 </div>
-                <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-5" disabled={loading}>
+                {verification.widget}
+                    <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-5" disabled={loading || !verification.token}>
                   {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting...</> : <><Package className="w-4 h-4 mr-2" />Submit Donation Offer</>}
                 </Button>
               </form>

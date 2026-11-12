@@ -1,3 +1,4 @@
+import { useTurnstile } from "@/hooks/useTurnstile";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -28,6 +29,7 @@ const DonateFunds = () => {
   const [donorPhone, setDonorPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("pesapal");
+  const verification = useTurnstile(activeTab === "paypal" ? "donation_paypal" : "donation_pesapal");
   const [errors, setErrors] = useState<ValidationError>({});
   const [statusMessage, setStatusMessage] = useState("");
 
@@ -55,12 +57,17 @@ const DonateFunds = () => {
 
 
   const handlePesapalPayment = async () => {
-    if (!validateForm()) return;
+    if (loading || !validateForm()) return;
+    if (!verification.token) {
+      toast.error("Please complete security verification.");
+      return;
+    }
     setLoading(true);
     setStatusMessage(`Processing your ${formatAmount(Number(amount) || 0)} donation with Pesapal. Please wait.`);
     try {
       const { data, error } = await supabase.functions.invoke("pesapal-payment", {
         body: {
+          turnstile_token: verification.token,
           amount,
           // Charge in the currency the donor selected — Ugandan mobile money is
           // only debited for UGX orders.
@@ -89,17 +96,23 @@ const DonateFunds = () => {
       toast.error(err.message || "Payment failed. Please try again.");
       setStatusMessage(err.message || "Payment failed. Please try again.");
     } finally {
+      verification.reset();
       setLoading(false);
     }
   };
 
   const handlePayPalPayment = async () => {
-    if (!validateForm()) return;
+    if (loading || !validateForm()) return;
+    if (!verification.token) {
+      toast.error("Please complete security verification.");
+      return;
+    }
     setLoading(true);
     setStatusMessage(`Processing your ${formatAmount(Number(amount) || 0)} donation with PayPal. Please wait.`);
     try {
       const { data: createData, error: createError } = await supabase.functions.invoke("paypal-payment", {
         body: {
+          turnstile_token: verification.token,
           action: "create-order",
           amount,
           donor_name: sanitize(donorName, MAX_LENGTHS.name),
@@ -123,6 +136,7 @@ const DonateFunds = () => {
       toast.error(err.message || "Payment failed. Please try again.");
       setStatusMessage(err.message || "Payment failed. Please try again.");
     } finally {
+      verification.reset();
       setLoading(false);
     }
   };
@@ -225,10 +239,11 @@ const DonateFunds = () => {
                   </Tabs>
                 </div>
 
+                {verification.widget}
                 <Button
                   size="lg"
                   className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-6 text-lg rounded-xl"
-                  disabled={!amount || loading}
+                  disabled={!amount || loading || !verification.token}
                   onClick={activeTab === "pesapal" ? handlePesapalPayment : handlePayPalPayment}
                 >
                   {loading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Heart className="w-5 h-5 mr-2 fill-current" />}

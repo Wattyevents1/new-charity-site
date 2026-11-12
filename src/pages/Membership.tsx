@@ -1,3 +1,4 @@
+import { useTurnstile } from "@/hooks/useTurnstile";
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import SEO from "@/components/SEO";
@@ -25,6 +26,7 @@ const Membership = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
+  const verification = useTurnstile("membership_payment");
   const { formatAmount } = useCurrency();
   const [errors, setErrors] = useState<ValidationError>({});
 
@@ -35,30 +37,23 @@ const Membership = () => {
       toast.error("Please enter a valid email address.");
       return;
     }
+    if (loading || !verification.token) {
+      toast.error("Please complete security verification.");
+      return;
+    }
     setLoading(true);
     try {
-      const { data: membershipResult, error: membershipError } = await supabase.functions.invoke("public-forms", {
-        body: {
-          action: "submit_membership",
-          data: {
-            donor_email: sanitize(email, MAX_LENGTHS.email),
-            donor_name: name ? sanitize(name, MAX_LENGTHS.name) : null,
-            tier: selectedTier.name.toLowerCase(),
-          },
-        },
-      });
-      if (membershipError) throw new Error(await extractFunctionError(membershipError));
-      if (membershipResult?.error) throw new Error(membershipResult.error);
-
       const { data, error } = await supabase.functions.invoke("pesapal-payment", {
         body: {
+          turnstile_token: verification.token,
+          membership_tier: selectedTier.name.toLowerCase(),
           amount: selectedTier.price,
           donor_name: sanitize(name, MAX_LENGTHS.name),
           donor_email: sanitize(email, MAX_LENGTHS.email),
           donor_phone: sanitize(phone, MAX_LENGTHS.phone),
           description: `${selectedTier.name} Membership - Monthly`,
           is_recurring: true,
-          callback_url: window.location.origin + "/?donation=success",
+          callback_url: window.location.origin,
         },
       });
       if (error) throw new Error(await extractFunctionError(error));
@@ -72,6 +67,7 @@ const Membership = () => {
       console.error("Membership payment error:", err);
       toast.error(err.message || "Payment failed. Please try again.");
     } finally {
+      verification.reset();
       setLoading(false);
     }
   };
@@ -139,7 +135,8 @@ const Membership = () => {
               <Label htmlFor="member-phone">Phone (for mobile money)</Label>
               <Input id="member-phone" type="tel" placeholder="+256700000000" className="mt-1" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={MAX_LENGTHS.phone} />
             </div>
-            <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold" disabled={!email || loading} onClick={handleJoin}>
+            {verification.widget}
+            <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold" disabled={!email || loading || !verification.token} onClick={handleJoin}>
               {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Heart className="w-4 h-4 mr-2 fill-current" />}
               {loading ? "Processing..." : `Pay ${selectedTier ? formatAmount(selectedTier.price) : ""}/month via Pesapal`}
             </Button>
